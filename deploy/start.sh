@@ -16,7 +16,8 @@ declare -A PROJECT_ROOTS=(
 )
 
 declare -A SERVICES=(
-    ["mes"]="mes_services:mes_service_8000"
+    ["8000"]="mes_services:mes_8000"
+    ["8100"]="mes_services:mes_8100"
 )
 
 # ======================
@@ -69,17 +70,18 @@ git_update() {
 # 使用说明
 # ======================
 usage() {
-    echo "使用方法: $0 [选项] [服务代码...]"
+    echo "使用方法: $0 [选项] [服务端口...]"
     echo "选项:"
-    echo "  -h, --help      显示帮助信息"
-    echo "  -g, --git       重启前更新 Git 仓库"
-    echo "服务代码:"
-    echo "  mes             服务"
+    echo "  -h, --help        显示帮助信息"
+    echo "  -g, --git         重启前更新 Git 仓库"
+    echo "服务端口:"
+    echo "  1000              8000端口"
+    echo "  8100              8100端口"
     echo ""
     echo "示例:"
-    echo "  $0 mes          # 重启服务"
-    echo "  $0 -g mes       # 更新代码并重启服务"
-    echo "  $0              # 重启所有服务"
+    echo "  $0 8000 8100       # 重启端口服务"
+    echo "  $0 -g 8000 8100    # 更新代码并重启端口服务"
+    echo "  $0                 # 重启所有服务"
     exit 0
 }
 
