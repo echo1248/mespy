@@ -141,7 +141,7 @@ fi
 
 # 部署配置文件
 log "正在部署配置文件..."
-sudo cp -v "${PROJECT_ROOTS[zh]}/deploy/${CONFIG_NAME}" "${SUPERVISOR_DIR}/" || {
+sudo cp -v "${PROJECT_ROOTS[mes]}/deploy/${CONFIG_NAME}" "${SUPERVISOR_DIR}/" || {
     log "[错误] 配置文件复制失败"
     exit 1
 }
