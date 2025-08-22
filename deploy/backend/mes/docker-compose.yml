@@ -1,0 +1,49 @@
+services:
+  mysql:
+    restart: always
+    privileged: true
+    image: mysql
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=Qkxc123456
+    volumes:
+      - /opt/mes/container/mysql/log:/var/log/mysql # 映射日志目录，宿主机:容器
+      - /opt/mes/container/mysql/data:/var/lib/mysql # 映射数据目录，宿主机:容器
+      - /opt/mes/container/mysql/conf.d:/etc/mysql/conf.d # 映射配置目录，宿主机:容器
+      - /etc/localtime:/etc/localtime:ro # 让容器的时钟与宿主机时钟同步，避免时间的问题，ro是read only的意思，就是只读。
+    ports:
+      - 3306:3306  # 主机端口:容器端口
+  #    command: --lower_case_table_names=1
+
+  redis:
+    restart: always
+    privileged: true
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379 # 主机端口:容器端口
+    volumes:
+      - /opt/mes/container/redis/data:/data
+    command: [ "redis-server", "--requirepass", "Qkxc123456" ]
+
+  nginx:
+    restart: always
+    privileged: true
+    image: nginx
+    container_name: nginx
+    ports:
+      - 80:80 # 主机端口:容器端口
+      - 443:443 # 主机端口:容器端口
+    environment:
+      - NGINX_PORT=80
+      - TZ=Asia/Shanghai
+    volumes:
+      - /opt/mes/container/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - /opt/mes/container/nginx/html:/usr/share/nginx/html
+      - /opt/mes/container/nginx/logs:/var/log/nginx
+    networks:
+      - web_net
+
+networks:
+  web_net:
+    driver: bridge
