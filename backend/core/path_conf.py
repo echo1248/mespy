@@ -9,7 +9,7 @@ BASE_PATH = Path(__file__).resolve().parent.parent
 ALEMBIC_VERSION_DIR = BASE_PATH / 'alembic' / 'versions'
 
 # 日志文件路径
-LOG_DIR = BASE_PATH.parent.parent / 'log'
+LOG_DIR = BASE_PATH / 'log'
 
 # 静态资源目录
 STATIC_DIR = BASE_PATH / 'static'
