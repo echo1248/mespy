@@ -157,7 +157,7 @@ class GenService:
             if not business:
                 raise errors.NotFoundError(msg='业务不存在')
 
-            gen_path = business.gen_path or 'fba-backend-app-dir'
+            gen_path = business.gen_path or 'mes-backend-app-dir'
             target_files = gen_template.get_code_gen_paths(business)
 
             return [os.path.join(gen_path, *target_file.split('/')) for target_file in target_files]

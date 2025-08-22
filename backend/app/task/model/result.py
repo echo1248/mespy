@@ -10,7 +10,7 @@ from sqlalchemy.types import PickleType
 from backend.common.model import MappedBase
 
 """
-重写 celery.backends.database.models 内部所有模型，适配 fba 创建表和 alembic 迁移
+重写 celery.backends.database.models 内部所有模型，适配 mes 创建表和 alembic 迁移
 """
 
 

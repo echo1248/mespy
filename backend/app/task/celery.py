@@ -31,7 +31,7 @@ def init_celery() -> celery.Celery:
 
     # https://docs.celeryq.dev/en/stable/userguide/configuration.html
     app = celery.Celery(
-        'fba_celery',
+        'mes_celery',
         broker_url=f'redis://:{settings.REDIS_PASSWORD}@{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.CELERY_BROKER_REDIS_DATABASE}'
         if settings.CELERY_BROKER == 'redis'
         else f'amqp://{settings.CELERY_RABBITMQ_USERNAME}:{settings.CELERY_RABBITMQ_PASSWORD}@{settings.CELERY_RABBITMQ_HOST}:{settings.CELERY_RABBITMQ_PORT}',

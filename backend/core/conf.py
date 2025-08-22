@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     # 数据库
     DATABASE_ECHO: bool | Literal['debug'] = False
     DATABASE_POOL_ECHO: bool | Literal['debug'] = False
-    DATABASE_SCHEMA: str = 'fba'
+    DATABASE_SCHEMA: str = 'mespy'
     DATABASE_CHARSET: str = 'utf8mb4'
 
     # .env Redis
@@ -61,10 +61,10 @@ class Settings(BaseSettings):
     TOKEN_ALGORITHM: str = 'HS256'
     TOKEN_EXPIRE_SECONDS: int = 60 * 60 * 24  # 1 天
     TOKEN_REFRESH_EXPIRE_SECONDS: int = 60 * 60 * 24 * 7  # 7 天
-    TOKEN_REDIS_PREFIX: str = 'fba:token'
-    TOKEN_EXTRA_INFO_REDIS_PREFIX: str = 'fba:token_extra_info'
-    TOKEN_ONLINE_REDIS_PREFIX: str = 'fba:token_online'
-    TOKEN_REFRESH_REDIS_PREFIX: str = 'fba:refresh_token'
+    TOKEN_REDIS_PREFIX: str = 'mes:token'
+    TOKEN_EXTRA_INFO_REDIS_PREFIX: str = 'mes:token_extra_info'
+    TOKEN_ONLINE_REDIS_PREFIX: str = 'mes:token_online'
+    TOKEN_REFRESH_REDIS_PREFIX: str = 'mes:refresh_token'
     TOKEN_REQUEST_PATH_EXCLUDE: list[str] = [  # JWT / RBAC 路由白名单
         f'{FASTAPI_API_V1_PATH}/auth/login',
     ]
@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     ]
 
     # JWT
-    JWT_USER_REDIS_PREFIX: str = 'fba:user'
+    JWT_USER_REDIS_PREFIX: str = 'mes:user'
 
     # RBAC
     RBAC_ROLE_MENU_MODE: bool = True
@@ -83,11 +83,11 @@ class Settings(BaseSettings):
     ]
 
     # Cookie
-    COOKIE_REFRESH_TOKEN_KEY: str = 'fba_refresh_token'
+    COOKIE_REFRESH_TOKEN_KEY: str = 'mes_refresh_token'
     COOKIE_REFRESH_TOKEN_EXPIRE_SECONDS: int = 60 * 60 * 24 * 7  # 7 天
 
     # 验证码
-    CAPTCHA_LOGIN_REDIS_PREFIX: str = 'fba:login:captcha'
+    CAPTCHA_LOGIN_REDIS_PREFIX: str = 'mes:login:captcha'
     CAPTCHA_LOGIN_EXPIRE_SECONDS: int = 60 * 5  # 3 分钟
 
     # 数据权限
@@ -118,7 +118,7 @@ class Settings(BaseSettings):
     MIDDLEWARE_CORS: bool = True
 
     # 请求限制配置
-    REQUEST_LIMITER_REDIS_PREFIX: str = 'fba:limiter'
+    REQUEST_LIMITER_REDIS_PREFIX: str = 'mes:limiter'
 
     # 时间配置
     DATETIME_TIMEZONE: str = 'Asia/Shanghai'
@@ -141,7 +141,7 @@ class Settings(BaseSettings):
 
     # IP 定位配置
     IP_LOCATION_PARSE: Literal['online', 'offline', 'false'] = 'offline'
-    IP_LOCATION_REDIS_PREFIX: str = 'fba:ip:location'
+    IP_LOCATION_REDIS_PREFIX: str = 'mes:ip:location'
     IP_LOCATION_EXPIRE_SECONDS: int = 60 * 60 * 24  # 1 天
 
     # Trace ID
@@ -160,8 +160,8 @@ class Settings(BaseSettings):
     # 日志（文件）
     LOG_FILE_ACCESS_LEVEL: str = 'INFO'
     LOG_FILE_ERROR_LEVEL: str = 'ERROR'
-    LOG_ACCESS_FILENAME: str = 'fba_access.log'
-    LOG_ERROR_FILENAME: str = 'fba_error.log'
+    LOG_ACCESS_FILENAME: str = 'mes_access.log'
+    LOG_ERROR_FILENAME: str = 'mes_error.log'
 
     # .env 操作日志
     OPERA_LOG_ENCRYPT_SECRET_KEY: str  # 密钥 os.urandom(32), 需使用 bytes.hex() 方法转换为 str
@@ -189,7 +189,7 @@ class Settings(BaseSettings):
     # Plugin 配置
     PLUGIN_PIP_CHINA: bool = True
     PLUGIN_PIP_INDEX_URL: str = 'https://mirrors.aliyun.com/pypi/simple/'
-    PLUGIN_REDIS_PREFIX: str = 'fba:plugin'
+    PLUGIN_REDIS_PREFIX: str = 'mes:plugin'
 
     # I18n 配置
     I18N_DEFAULT_LANGUAGE: str = 'zh-CN'
@@ -201,7 +201,7 @@ class Settings(BaseSettings):
     CELERY_BROKER_REDIS_DATABASE: int
 
     # .env RabbitMQ
-    # docker run -d --hostname fba-mq --name fba-mq  -p 5672:5672 -p 15672:15672 rabbitmq:latest
+    # docker run -d --hostname mes-mq --name mes-mq  -p 5672:5672 -p 15672:15672 rabbitmq:latest
     CELERY_RABBITMQ_HOST: str
     CELERY_RABBITMQ_PORT: int
     CELERY_RABBITMQ_USERNAME: str
@@ -209,13 +209,13 @@ class Settings(BaseSettings):
 
     # 基础配置
     CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'redis'
-    CELERY_REDIS_PREFIX: str = 'fba:celery'
+    CELERY_REDIS_PREFIX: str = 'mes:celery'
     CELERY_TASK_MAX_RETRIES: int = 5
 
     ##################################################
     # [ Plugin ] code_generator
     ##################################################
-    CODE_GENERATOR_DOWNLOAD_ZIP_FILENAME: str = 'fba_generator'
+    CODE_GENERATOR_DOWNLOAD_ZIP_FILENAME: str = 'mes_generator'
 
     ##################################################
     # [ Plugin ] oauth2
@@ -240,7 +240,7 @@ class Settings(BaseSettings):
     EMAIL_HOST: str = 'smtp.qq.com'
     EMAIL_PORT: int = 465
     EMAIL_SSL: bool = True
-    EMAIL_CAPTCHA_REDIS_PREFIX: str = 'fba:email:captcha'
+    EMAIL_CAPTCHA_REDIS_PREFIX: str = 'mes:email:captcha'
     EMAIL_CAPTCHA_EXPIRE_SECONDS: int = 60 * 3  # 3 分钟
 
     @model_validator(mode='before')

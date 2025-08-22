@@ -30,5 +30,5 @@ async def send_email_captcha(
         ex=settings.EMAIL_CAPTCHA_EXPIRE_SECONDS,
     )
     content = {'code': code, 'expired': int(settings.EMAIL_CAPTCHA_EXPIRE_SECONDS / 60)}
-    await send_email(db, recipients, 'FBA 验证码', content, 'captcha.html')
+    await send_email(db, recipients, 'MES 验证码', content, 'captcha.html')
     return response_base.success()

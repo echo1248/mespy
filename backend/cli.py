@@ -41,11 +41,11 @@ def run(host: str, port: int, reload: bool, workers: int | None) -> None:
     panel_content.append(f'📚 Redoc   文档: {redoc_url}\n', style='yellow')
     panel_content.append(f'📡 OpenAPI JSON: {openapi_url}\n', style='green')
     panel_content.append(
-        '🌍 fba 官方文档: https://fastapi-practices.github.io/fastapi_best_architecture_docs/',
+        '🌍 mes 官方文档: https://fastapi-practices.github.io/fastapi_best_architecture_docs/',
         style='cyan',
     )
 
-    console.print(Panel(panel_content, title='fba 服务信息', border_style='purple', padding=(1, 2)))
+    console.print(Panel(panel_content, title='mes 服务信息', border_style='purple', padding=(1, 2)))
     granian.Granian(
         target='backend.main:app',
         interface='asgi',
@@ -222,9 +222,9 @@ class Add:
         await install_plugin(self.path, self.repo_url, self.no_sql, self.db_type, self.pk_type)
 
 
-@cappa.command(help='一个高效的 fba 命令行界面')
+@cappa.command(help='一个高效的 mes 命令行界面')
 @dataclass
-class FbaCli:
+class MesCli:
     version: Annotated[
         bool,
         cappa.Arg(short='-V', long=True, default=False, show_default=False, help='打印当前版本号'),
@@ -244,4 +244,4 @@ class FbaCli:
 
 def main() -> None:
     output = cappa.Output(error_format='[red]Error[/]: {message}\n\n更多信息，尝试 "[cyan]--help[/]"')
-    asyncio.run(cappa.invoke_async(FbaCli, output=output))
+    asyncio.run(cappa.invoke_async(MesCli, output=output))
