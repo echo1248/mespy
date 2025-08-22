@@ -53,6 +53,8 @@
 
     uv sync --frozen
 
-# 启动
+# 更新
 
-    jqd run
+    git fetch upstream
+
+    git merge upstream/master
