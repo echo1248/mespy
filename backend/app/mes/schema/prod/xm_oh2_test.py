@@ -59,6 +59,8 @@ class XMOH2TestSchemaBase(SchemaBase):
     test_pass_on3: datetime | None = Field(default=None, description='第三轮测试通过时间')
     test_pass_testedby3: str | None = Field(default=None, description='第三轮测试执行者')
     test_pass: bool = Field(default=False, description='总体测试通过状态')
+    test_orderkey_s: str | None = Field(default=None, description='订单号(溯源)')
+    test_orderkey: str | None = Field(default=None, description='订单号')
 
 
 class CreateXMOH2TestParam(XMOH2TestSchemaBase):

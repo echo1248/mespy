@@ -52,7 +52,7 @@ values
 (47, '下线', 'KickOutOnline', null, 0, null, 2, null, 'sys:session:delete', 1, 0, 1, '', null, 46, '2025-06-26 20:29:06', null),
 (48, 'page.menu.redis', 'Redis', '/monitor/redis', 2, 'devicon:redis', 1, '/monitor/redis/index', null, 1, 1, 1, '', null, 45, '2025-06-26 20:29:06', null),
 (49, 'page.menu.server', 'Server', '/monitor/server', 3, 'mdi:server-outline', 1, '/monitor/server/index', null, 1, 1, 1, '', null, 45, '2025-06-26 20:29:06', null),
-(50, '项目', 'Project', '/mes', 5, 'https://wu-clan.github.io/picx-images-hosting/logo/mes.png', 0, null, null, 1, 1, 1, '', null, null, '2025-06-26 20:29:06', null),
+(50, '项目', 'Project', '/mes', 5, 'https://wu-clan.github.io/picx-images-hosting/logo/fba.png', 0, null, null, 1, 1, 1, '', null, null, '2025-06-26 20:29:06', null),
 (51, '文档', 'Document', '/mes/document', 1, 'lucide:book-open-text', 4, '/_core/fallback/iframe.vue', null, 1, 1, 1, 'https://fastapi-practices.github.io/fastapi_best_architecture_docs', null, 50, '2025-06-26 20:29:06', null),
 (52, 'Github', 'Github', '/mes/github', 2, 'ant-design:github-filled', 4, '/_core/fallback/iframe.vue', null, 1, 1, 1, 'https://github.com/fastapi-practices/fastapi_best_architecture', null, 50, '2025-06-26 20:29:06', null),
 (53, 'Apifox', 'Apifox', '/mes/apifox', 3, 'simple-icons:apifox', 3, '/_core/fallback/iframe.vue', null, 1, 1, 1, 'https://apifox.com/apidoc/shared-28a93f02-730b-4f33-bb5e-4dad92058cc0', null, 50, '2025-06-26 20:29:06', null),

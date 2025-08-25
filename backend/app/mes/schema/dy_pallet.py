@@ -62,6 +62,8 @@ class BillParam(SchemaBase):
     """审核单据参数"""
     pallet_pid: str = Field(description='产品ID')
     pallet_key: str = Field(description='栈板号(栈板标)')
+    orderkey_s: str = Field(description='订单号(溯源)')
+    orderkey: str = Field(description='订单号')
 
 
 class BillParamList(SchemaBase):

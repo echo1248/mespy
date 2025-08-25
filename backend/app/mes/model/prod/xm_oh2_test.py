@@ -78,3 +78,5 @@ class XMOH2Test(DataClassBase):
     test_pass: Mapped[bool] = mapped_column(
         Boolean().with_variant(INTEGER, 'postgresql'), comment='总体测试通过状态'
     )
+    test_orderkey_s: Mapped[str] = mapped_column(CHAR(32), comment='订单号(溯源)')
+    test_orderkey: Mapped[str] = mapped_column(CHAR(32), comment='订单号')
