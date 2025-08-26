@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-@Project : jiqid-py
-@File    : xm_oh2_test.py
-@Author  : your_name@your_company.com
-@Date    : 2025/08/20 14:30
+@Project : mespy
+@File    : xm_oh11_test.py
+@Author  : guhua@jiqid.com
+@Date    : 2025/08/26 14:33
 """
 
 from datetime import datetime
@@ -14,10 +14,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from backend.common.model import DataClassBase, id_key
 
 
-class XMOH2Test(DataClassBase):
-    """oh2产品表"""
+class XMOH11Test(DataClassBase):
+    """oh11产品表"""
 
-    __tablename__ = 'xm_oh2_test'
+    __tablename__ = 'xm_oh11_test'
 
     __table_args__ = (
         # 唯一索引
@@ -42,12 +42,12 @@ class XMOH2Test(DataClassBase):
         Index('test_btmac_index', 'test_btmac'),
 
         # 表注释
-        {'comment': 'oh2产品表'}
+        {'comment': 'oh11产品表'}
     )
 
     test_id: Mapped[id_key] = mapped_column(init=False)
     test_pid: Mapped[str] = mapped_column(CHAR(32), comment='产品ID')
-    test_skukey: Mapped[str] = mapped_column(CHAR(32), comment='序列号唯一键')
+    test_skukey: Mapped[str] = mapped_column(CHAR(64), comment='序列号唯一键')  # 注意有两个 test_slukey 字段，长度不同
     test_skutitle: Mapped[str] = mapped_column(VARCHAR(128), comment='研究标识')
     test_expired: Mapped[bool] = mapped_column(
         Boolean().with_variant(INTEGER, 'postgresql'), comment='是否过期'
@@ -73,6 +73,7 @@ class XMOH2Test(DataClassBase):
     test_info_1: Mapped[str] = mapped_column(TEXT, comment='第一轮测试信息')
     test_info_2: Mapped[str] = mapped_column(TEXT, comment='第二轮测试信息')
     test_info_3: Mapped[str] = mapped_column(TEXT, comment='第三轮测试信息')
+    # 第二个 test_slukey 字段，长度不同
     test_subkey: Mapped[str] = mapped_column(CHAR(64), comment='序列号唯一键2')
     test_wifimac: Mapped[str] = mapped_column(CHAR(32), comment='WIFI MAC地址')
     test_btmac: Mapped[str] = mapped_column(CHAR(32), comment='bt编码')
@@ -84,7 +85,7 @@ class XMOH2Test(DataClassBase):
     test_failtitle: Mapped[str] = mapped_column(VARCHAR(255), comment='失败标题')
     test_firmware_v: Mapped[str] = mapped_column(CHAR(64), comment='固件版本')
     test_desc: Mapped[str] = mapped_column(VARCHAR(255), comment='测试描述')
-    test_creatorkey: Mapped[str | None] = mapped_column(VARCHAR(32), comment='创建者键')
+    test_creatorkey: Mapped[str] = mapped_column(VARCHAR(32), comment='创建者键')
     test_modifiedon: Mapped[datetime | None] = mapped_column(DateTime, comment='修改时间')
     test_modifierkey: Mapped[str] = mapped_column(CHAR(32), comment='修改者键')
     test_deletedon: Mapped[datetime | None] = mapped_column(DateTime, comment='删除时间')
@@ -103,5 +104,3 @@ class XMOH2Test(DataClassBase):
     test_pass: Mapped[bool] = mapped_column(
         Boolean().with_variant(INTEGER, 'postgresql'), comment='总体测试通过状态'
     )
-    test_k3orderkey_s: Mapped[str | None] = mapped_column(CHAR(32), default=None, comment='源单单号')
-    test_k3orderkey: Mapped[str | None] = mapped_column(CHAR(32), default=None, comment='单据编号')

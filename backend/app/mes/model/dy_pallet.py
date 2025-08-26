@@ -9,7 +9,6 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, Integer, CHAR, Index
-from sqlalchemy.dialects.postgresql import INTEGER
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.common.model import DataClassBase, id_key
@@ -20,26 +19,25 @@ class DyPallet(DataClassBase):
 
     __tablename__ = 'dy_pallet'
     __table_args__ = (
-        # 唯一索引（注意：cartonkey应该是唯一的）
+        # 唯一索引（cartonkey唯一）
         Index('pallet_cartonkey_index', 'pallet_cartonkey', unique=True),
 
-        # 复合索引（cartonkey + created_on 组合查询）
+        # 复合索引
         Index('test_sn_createdon_index', 'pallet_cartonkey', 'pallet_created_on'),
 
-        # 单列索引（按业务重要性排序）
-        Index('pallet_created_on_index', 'pallet_created_on'),  # 创建时间查询
-        Index('pallet_creator_key_index', 'pallet_creator_key'),  # 创建者查询
-        Index('pallet_date_index', 'pallet_date'),  # 日期查询
-        Index('pallet_delivered_on_index', 'pallet_delivered_on'),  # 交付时间查询
-        Index('pallet_key_index', 'pallet_key'),  # 关键字段查询
-        Index('pallet_pid_index', 'pallet_pid'),  # 产品ID查询
-        Index('pallet_po_index', 'pallet_po'),  # 采购订单查询
-        Index('pallet_sku_index', 'pallet_sku'),  # SKU查询
-        Index('pallet_spec_index', 'pallet_spec'),  # 规格查询
-        Index('pallet_title_index', 'pallet_title'),  # 标题查询
-        Index('pallet_weight_idnex', 'pallet_weight'),  # 重量查询
+        # 单列索引
+        Index('pallet_created_on_index', 'pallet_created_on'),
+        Index('pallet_creator_key_index', 'pallet_creator_key'),
+        Index('pallet_date_index', 'pallet_date'),
+        Index('pallet_delivered_on_index', 'pallet_delivered_on'),
+        Index('pallet_key_index', 'pallet_key'),
+        Index('pallet_pid_index', 'pallet_pid'),
+        Index('pallet_po_index', 'pallet_po'),
+        Index('pallet_sku_index', 'pallet_sku'),
+        Index('pallet_spec_index', 'pallet_spec'),
+        Index('pallet_title_index', 'pallet_title'),
+        Index('pallet_weight_idnex', 'pallet_weight'),
 
-        # 可以添加表注释
         {'comment': '栈板表'}
     )
 
@@ -50,29 +48,26 @@ class DyPallet(DataClassBase):
     pallet_date: Mapped[str] = mapped_column(CHAR(32), comment='日期')
     pallet_title: Mapped[str] = mapped_column(String(64), comment='标题')
     pallet_spec: Mapped[str] = mapped_column(String(32), comment='规格')
-    pallet_deficient: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='是否缺货'
-    )
+    pallet_deficient: Mapped[bool] = mapped_column(Boolean, nullable=True, comment='是否缺货')
     pallet_weight: Mapped[str] = mapped_column(String(32), comment='重量')
-    pallet_num: Mapped[int] = mapped_column(Integer, comment='当前数量')
-    pallet_maxnum: Mapped[int] = mapped_column(Integer, comment='最大数量')
+    pallet_num: Mapped[int] = mapped_column(Integer, nullable=True, comment='当前数量')
+    pallet_maxnum: Mapped[int] = mapped_column(Integer, comment='最大数量')  # NOT NULL，需要确保有值
     pallet_key: Mapped[str] = mapped_column(CHAR(32), comment='栈板号(栈板标)')
-    pallet_warehouse: Mapped[str] = mapped_column(String(32), comment='仓库')
+    pallet_warehouse: Mapped[str | None] = mapped_column(String(32), nullable=True, comment='仓库')
     pallet_cartonkey: Mapped[str] = mapped_column(CHAR(32), comment='箱号(箱标)，关联dy_carton表')
-    pallet_created_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='创建时间')
-    pallet_creator_key: Mapped[str] = mapped_column(CHAR(32), comment='创建者编码')
-    pallet_deleted: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='是否删除'
-    )
-    pallet_deleter_code: Mapped[str] = mapped_column(CHAR(32), comment='删除者编码')
-    pallet_deleted_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='删除时间')
-    pallet_delivered: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='是否已交付'
-    )
-    pallet_delivered_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='交付时间')
-    pallet_cartonpallet_checked: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='纸箱托盘检查状态'
-    )
-    pallet_printlock: Mapped[str] = mapped_column(CHAR(32), comment='打印锁定')
-    pallet_printunlock_userkey: Mapped[str] = mapped_column(CHAR(32), comment='打印解锁用户编码')
-    pallet_printunlocked_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='打印解锁时间')
+    pallet_created_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                               comment='创建时间')
+    pallet_creator_key: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='创建者编码')
+    pallet_deleted: Mapped[bool] = mapped_column(Boolean, comment='是否删除')
+    pallet_deleter_code: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='删除者编码')
+    pallet_deleted_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                               comment='删除时间')
+    pallet_delivered: Mapped[bool] = mapped_column(Boolean, comment='是否已交付')
+    pallet_delivered_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                 comment='交付时间')
+    pallet_cartonpallet_checked: Mapped[bool] = mapped_column(Boolean, nullable=True,
+                                                              comment='纸箱托盘检查状态')
+    pallet_printlock: Mapped[bool] = mapped_column(Boolean, comment='打印锁定')
+    pallet_printunlock_userkey: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='打印解锁用户编码')
+    pallet_printunlocked_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                     comment='打印解锁时间')

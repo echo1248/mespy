@@ -10,7 +10,6 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import Boolean, DateTime, Integer, CHAR, DECIMAL, Index
-from sqlalchemy.dialects.postgresql import INTEGER, NUMERIC
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.common.model import DataClassBase, id_key
@@ -28,13 +27,12 @@ class DyCarton(DataClassBase):
         Index('test_sn_createdon_index', 'carton_boxsn', 'carton_created_on'),
 
         # 单列索引
-        Index('carton_boxsn_index', 'carton_boxsn'),  # 箱号查询
-        Index('carton_created_on_index', 'carton_created_on'),  # 创建时间查询
-        Index('carton_creator_key_idex', 'carton_creator_key'),  # 创建者查询
-        Index('carton_delivered_on_index', 'carton_delivered_on'),  # 交付时间查询
-        Index('carton_key_index', 'carton_key'),  # 关键字段查询
+        Index('carton_boxsn_index', 'carton_boxsn'),
+        Index('carton_created_on_index', 'carton_created_on'),
+        Index('carton_creator_key_idex', 'carton_creator_key'),
+        Index('carton_delivered_on_index', 'carton_delivered_on'),
+        Index('carton_key_index', 'carton_key'),
 
-        # 可以添加表注释
         {'comment': '纸箱管理表'}
     )
 
@@ -43,34 +41,26 @@ class DyCarton(DataClassBase):
     carton_sku: Mapped[str] = mapped_column(CHAR(32), comment='SKU编码')
     carton_cartonindex: Mapped[int] = mapped_column(Integer, comment='纸箱索引')
     carton_palletindex: Mapped[int] = mapped_column(Integer, comment='栈板索引')
-    carton_prodid: Mapped[str] = mapped_column(
-        CHAR(32), comment='产品ID（过渡栏位，最终用carton_sku.sql更新，procGetCarton）'
-    )
+    carton_prodid: Mapped[str] = mapped_column(CHAR(32), comment='产品ID')
     carton_boxsn: Mapped[str] = mapped_column(CHAR(64), comment='产品的SN号')
     carton_num: Mapped[int] = mapped_column(Integer, comment='数量')
-    carton_weight: Mapped[Decimal] = mapped_column(
-        DECIMAL(10, 2).with_variant(NUMERIC(10, 2), 'postgresql'),
-        comment='重量'
-    )
-    carton_weighting_key: Mapped[str] = mapped_column(CHAR(32), comment='称重编码')
-    carton_weighting_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='称重时间')
-    carton_deficient: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='是否满箱'
-    )
-    carton_created_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='创建时间')
-    carton_creator_key: Mapped[str] = mapped_column(CHAR(32), comment='创建者编码')
-    carton_deleted: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='是否删除'
-    )
-    carton_deleter_code: Mapped[str] = mapped_column(CHAR(32), comment='删除者编码')
-    carton_deleted_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='删除时间')
-    carton_delivered: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='是否已交付'
-    )
-    carton_delivered_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='交付时间')
-    carton_printlock: Mapped[bool] = mapped_column(
-        Boolean().with_variant(INTEGER, 'postgresql'), comment='打印锁定'
-    )
-    carton_printunlock_userkey: Mapped[str] = mapped_column(CHAR(32), comment='打印解锁用户编码')
-    carton_printunlocked_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), comment='打印解锁时间')
-    carton_rma: Mapped[int] = mapped_column(Integer, comment='是否为RMA售后机装错（0否，1是）')
+    carton_weight: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), comment='重量')
+    carton_weighting_key: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='称重编码')
+    carton_weighting_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                 comment='称重时间')
+    carton_deficient: Mapped[bool] = mapped_column(Boolean, comment='是否满箱')
+    carton_created_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                               comment='创建时间')
+    carton_creator_key: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='创建者编码')
+    carton_deleted: Mapped[bool] = mapped_column(Boolean, comment='是否删除')
+    carton_deleter_code: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='删除者编码')
+    carton_deleted_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                               comment='删除时间')
+    carton_delivered: Mapped[bool] = mapped_column(Boolean, comment='是否已交付')
+    carton_delivered_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                 comment='交付时间')
+    carton_printlock: Mapped[bool] = mapped_column(Boolean, comment='打印锁定')
+    carton_printunlock_userkey: Mapped[str | None] = mapped_column(CHAR(32), nullable=True, comment='打印解锁用户编码')
+    carton_printunlocked_on: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True,
+                                                                     comment='打印解锁时间')
+    carton_rma: Mapped[int] = mapped_column(Integer, default=0, comment='是否为RMA售后机装箱')

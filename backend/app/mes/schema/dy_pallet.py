@@ -31,7 +31,7 @@ class DyPalletSchemaBase(SchemaBase):
     pallet_delivered: bool = Field(False, description='是否已交付')
     pallet_delivered_on: datetime | None = Field(None, description='交付时间')
     pallet_cartonpallet_checked: bool = Field(False, description='纸箱托盘检查状态')
-    pallet_printlock: str | None = Field(None, description='打印锁定')
+    pallet_printlock: bool = Field(False, description='打印锁定')
     pallet_printunlock_userkey: str | None = Field(None, description='打印解锁用户编码')
     pallet_printunlocked_on: datetime | None = Field(None, description='打印解锁时间')
 
