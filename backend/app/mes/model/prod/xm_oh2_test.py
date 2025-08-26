@@ -7,7 +7,7 @@
 """
 
 from datetime import datetime
-from sqlalchemy import Boolean, DateTime, Integer, CHAR, VARCHAR, TEXT, TIMESTAMP
+from sqlalchemy import Boolean, DateTime, Integer, CHAR, VARCHAR, TEXT, TIMESTAMP, Index
 from sqlalchemy.dialects.mysql import TINYINT, INTEGER
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -18,6 +18,32 @@ class XMOH2Test(DataClassBase):
     """oh2产品表"""
 
     __tablename__ = 'xm_oh2_test'
+
+    __table_args__ = (
+        # 唯一索引
+        Index('test_stkey_snkey_index', 'test_stkey', 'test_snkey', 'test_times_putin', unique=True),
+
+        # 复合索引
+        Index('test_stkey_subkey_index', 'test_stkey', 'test_subkey', 'test_times_putin'),
+        Index('test_sn_createdon_index', 'test_createdon', 'test_snkey'),
+
+        # 单列索引
+        Index('test_wifimac_index', 'test_wifimac'),
+        Index('test_subkey_idnex', 'test_subkey'),
+        Index('test_sttitle_index', 'test_sttitle'),
+        Index('test_stkey_index', 'test_stkey'),
+        Index('test_snkey_index', 'test_snkey'),
+        Index('test_skutitle_index', 'test_skutitle'),
+        Index('test_skukey_index', 'test_skukey'),
+        Index('test_pid_index', 'test_pid'),
+        Index('test_key_index', 'test_key'),
+        Index('test_did_index', 'test_did'),
+        Index('test_createdon_index', 'test_createdon'),
+        Index('test_btmac_index', 'test_btmac'),
+
+        # 表注释
+        {'comment': 'oh2产品表'}
+    )
 
     test_id: Mapped[id_key] = mapped_column(init=False)
     test_pid: Mapped[str] = mapped_column(CHAR(32), comment='产品ID')
@@ -78,5 +104,5 @@ class XMOH2Test(DataClassBase):
     test_pass: Mapped[bool] = mapped_column(
         Boolean().with_variant(INTEGER, 'postgresql'), comment='总体测试通过状态'
     )
-    test_orderkey_s: Mapped[str] = mapped_column(CHAR(32), comment='订单号(溯源)')
-    test_orderkey: Mapped[str] = mapped_column(CHAR(32), comment='订单号')
+    test_k3orderkey_s: Mapped[str] = mapped_column(CHAR(32), comment='源单单号')
+    test_k3orderkey: Mapped[str] = mapped_column(CHAR(32), comment='单据编号')

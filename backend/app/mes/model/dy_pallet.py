@@ -8,7 +8,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, Integer, CHAR
+from sqlalchemy import Boolean, DateTime, String, Integer, CHAR, Index
 from sqlalchemy.dialects.postgresql import INTEGER
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,6 +19,29 @@ class DyPallet(DataClassBase):
     """栈板表"""
 
     __tablename__ = 'dy_pallet'
+    __table_args__ = (
+        # 唯一索引（注意：cartonkey应该是唯一的）
+        Index('pallet_cartonkey_index', 'pallet_cartonkey', unique=True),
+
+        # 复合索引（cartonkey + created_on 组合查询）
+        Index('test_sn_createdon_index', 'pallet_cartonkey', 'pallet_created_on'),
+
+        # 单列索引（按业务重要性排序）
+        Index('pallet_created_on_index', 'pallet_created_on'),  # 创建时间查询
+        Index('pallet_creator_key_index', 'pallet_creator_key'),  # 创建者查询
+        Index('pallet_date_index', 'pallet_date'),  # 日期查询
+        Index('pallet_delivered_on_index', 'pallet_delivered_on'),  # 交付时间查询
+        Index('pallet_key_index', 'pallet_key'),  # 关键字段查询
+        Index('pallet_pid_index', 'pallet_pid'),  # 产品ID查询
+        Index('pallet_po_index', 'pallet_po'),  # 采购订单查询
+        Index('pallet_sku_index', 'pallet_sku'),  # SKU查询
+        Index('pallet_spec_index', 'pallet_spec'),  # 规格查询
+        Index('pallet_title_index', 'pallet_title'),  # 标题查询
+        Index('pallet_weight_idnex', 'pallet_weight'),  # 重量查询
+
+        # 可以添加表注释
+        {'comment': '栈板表'}
+    )
 
     pallet_id: Mapped[id_key] = mapped_column(init=False)
     pallet_po: Mapped[str] = mapped_column(CHAR(32), comment='采购订单号')

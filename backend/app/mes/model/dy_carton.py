@@ -9,7 +9,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, DateTime, Integer, CHAR, DECIMAL
+from sqlalchemy import Boolean, DateTime, Integer, CHAR, DECIMAL, Index
 from sqlalchemy.dialects.postgresql import INTEGER, NUMERIC
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,6 +20,23 @@ class DyCarton(DataClassBase):
     """纸箱表"""
 
     __tablename__ = 'dy_carton'
+    __table_args__ = (
+        # 唯一复合索引（boxsn + rma 组合唯一）
+        Index('carton_boxsn_ram', 'carton_boxsn', 'carton_rma', unique=True),
+
+        # 复合索引（boxsn + created_on 组合查询）
+        Index('test_sn_createdon_index', 'carton_boxsn', 'carton_created_on'),
+
+        # 单列索引
+        Index('carton_boxsn_index', 'carton_boxsn'),  # 箱号查询
+        Index('carton_created_on_index', 'carton_created_on'),  # 创建时间查询
+        Index('carton_creator_key_idex', 'carton_creator_key'),  # 创建者查询
+        Index('carton_delivered_on_index', 'carton_delivered_on'),  # 交付时间查询
+        Index('carton_key_index', 'carton_key'),  # 关键字段查询
+
+        # 可以添加表注释
+        {'comment': '纸箱管理表'}
+    )
 
     carton_id: Mapped[id_key] = mapped_column(init=False)
     carton_key: Mapped[str] = mapped_column(CHAR(32), comment='箱号(箱标)')
