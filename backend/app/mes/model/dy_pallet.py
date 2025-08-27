@@ -41,7 +41,7 @@ class DyPallet(DataClassBase):
         {'comment': '栈板表'}
     )
 
-    pallet_id: Mapped[id_key] = mapped_column(init=False)
+    pallet_id: Mapped[id_key] = mapped_column(init=False, comment='主键ID')
     pallet_po: Mapped[str] = mapped_column(CHAR(32), comment='采购订单号')
     pallet_sku: Mapped[str] = mapped_column(CHAR(32), comment='SKU编码')
     pallet_pid: Mapped[str] = mapped_column(CHAR(32), comment='产品ID')

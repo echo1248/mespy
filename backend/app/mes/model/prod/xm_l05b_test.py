@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """
 @Project : mespy
-@File    : xm_l0b5_test.py
+@File    : xm_l05b_test.py
 @Author  : guhua@jiqid.com
 @Date    : 2025/08/26 14:24
 """
@@ -15,7 +15,7 @@ from backend.common.model import DataClassBase, id_key
 
 
 class XML05BTest(DataClassBase):
-    """xm_l05b_test表"""
+    """L05B产品表"""
 
     __tablename__ = 'xm_l05b_test'
 
@@ -42,10 +42,10 @@ class XML05BTest(DataClassBase):
         Index('test_sn_createdon_index', 'test_createdon', 'test_snkey'),
 
         # 表注释
-        {'comment': 'xm_l05b_test表'}
+        {'comment': 'L05B产品表'}
     )
 
-    test_id: Mapped[id_key] = mapped_column(init=False)
+    test_id: Mapped[id_key] = mapped_column(init=False, comment='主键ID')
 
     test_pid: Mapped[str | None] = mapped_column(CHAR(32), comment='产品ID')
     test_skukey: Mapped[str | None] = mapped_column(CHAR(32), comment='序列号唯一键')

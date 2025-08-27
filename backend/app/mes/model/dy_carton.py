@@ -36,7 +36,7 @@ class DyCarton(DataClassBase):
         {'comment': '纸箱管理表'}
     )
 
-    carton_id: Mapped[id_key] = mapped_column(init=False)
+    carton_id: Mapped[id_key] = mapped_column(init=False, comment='主键ID')
     carton_key: Mapped[str] = mapped_column(CHAR(32), comment='箱号(箱标)')
     carton_sku: Mapped[str] = mapped_column(CHAR(32), comment='SKU编码')
     carton_cartonindex: Mapped[int] = mapped_column(Integer, comment='纸箱索引')

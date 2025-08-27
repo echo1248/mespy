@@ -83,8 +83,8 @@ class DyPalletService:
                     test_pass_1=1,
                     test_info_1="金蝶入库",
                     test_createdon=timezone.now(),
-                    test_orderkey_s=bill.orderkey_s,
-                    test_orderkey=bill.orderkey,
+                    test_k3orderkey_s=bill.k3orderkey_s,
+                    test_k3orderkey=bill.k3orderkey,
                 ))
 
             await xm_oh2_test_dao.bulk_create(db, objs)
@@ -120,6 +120,72 @@ class DyPalletService:
             cartons = await dy_carton_dao.select_models(db, carton_key__in=carton_keys)
 
             return pallets, cartons
+
+    def get_product_map(self):
+        """ 产品映射关系 """
+        return {
+            # JM03
+            "933006": "jr_jm03_test",
+            "933007": "jr_jm03_test",
+            "933002": "jr_jm03_test",
+            "933008": "jr_jm03_test",
+
+            # L05B/C
+            "31833": "xm_l05b_test",
+            "31834": "xm_l05b_test",
+
+            # M11A
+            "57470": "xm_m11a_test",
+            "58472": "xm_m11a_test",
+            "58473": "xm_m11a_test",
+
+            # OH2
+            "61346": "xm_oh2_test",
+            "73528": "xm_oh2_test",
+            "73529": "xm_oh2_test",
+            "73530": "xm_oh2_test",
+            "73531": "xm_oh2_test",
+            "73532": "xm_oh2_test",
+
+            # OH3R
+            "66522": "xm_oh3r_test",
+            "66523": "xm_oh3r_test",
+            "70163": "xm_oh3r_test",
+            "66524": "xm_oh3r_test",
+            "66525": "xm_oh3r_test",
+
+            # OH11
+            "66286": "xm_oh11_test",
+
+            # X4B
+            "55119": "xm_x4b_test",
+            "69675": "xm_x4b_test",
+
+            # X6A
+            "41052": "xm_x6a_test",
+
+            # X8C
+            "27414": "xm_x8C_test",
+
+            # X8F
+            "48350": "xm_x8f_test",
+
+            # MC601
+            "60314": "yz_mc60_01_test",
+
+            # MC602
+            "60317": "yz_mc601_test",
+            "63605": "yz_mc601_test",
+
+            # xhb (小黑板)
+            "47303": "xm_xhb_test",
+            "44573": "xm_xhb_test",
+            "44574": "xm_xhb_test",
+            "28505": "xm_xhb_test",
+
+            # K03
+            "44481": "dy_qbh4248cn_test",
+        }
 
 
 dy_pallet_service: DyPalletService = DyPalletService()

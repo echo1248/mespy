@@ -15,7 +15,7 @@ from backend.common.model import DataClassBase, id_key
 
 
 class XMM11ATest(DataClassBase):
-    """xm_m11a_test表"""
+    """M11A产品表"""
 
     __tablename__ = 'xm_m11a_test'
 
@@ -39,10 +39,10 @@ class XMM11ATest(DataClassBase):
         Index('test_sn_createdon_index', 'test_createdon', 'test_snkey'),
 
         # 表注释
-        {'comment': 'xm_m11a_test表'}
+        {'comment': 'M11A产品表'}
     )
 
-    test_id: Mapped[id_key] = mapped_column(init=False)
+    test_id: Mapped[id_key] = mapped_column(init=False, comment='主键ID')
 
     test_deleted: Mapped[bool] = mapped_column(
         Boolean().with_variant(INTEGER, 'postgresql'),

@@ -10,7 +10,7 @@ from backend.app.mes.model.dy_carton import DyCarton
 from backend.app.mes.model.dy_pallet import DyPallet
 
 from backend.app.mes.model.prod.jr_jm03_test import JRJM03Test
-from backend.app.mes.model.prod.xm_l0b5_test import XML0B5Test
+from backend.app.mes.model.prod.xm_l05b_test import XML05BTest
 from backend.app.mes.model.prod.xm_m11a_test import XMM11ATest
 from backend.app.mes.model.prod.xm_oh2_test import XMOH2Test
 from backend.app.mes.model.prod.xm_oh3r_test import XMOH3RTest

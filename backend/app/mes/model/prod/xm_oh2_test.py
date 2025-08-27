@@ -45,7 +45,7 @@ class XMOH2Test(DataClassBase):
         {'comment': 'oh2产品表'}
     )
 
-    test_id: Mapped[id_key] = mapped_column(init=False)
+    test_id: Mapped[id_key] = mapped_column(init=False, comment='主键ID')
     test_pid: Mapped[str] = mapped_column(CHAR(32), comment='产品ID')
     test_skukey: Mapped[str] = mapped_column(CHAR(32), comment='序列号唯一键')
     test_skutitle: Mapped[str] = mapped_column(VARCHAR(128), comment='研究标识')
@@ -103,5 +103,7 @@ class XMOH2Test(DataClassBase):
     test_pass: Mapped[bool] = mapped_column(
         Boolean().with_variant(INTEGER, 'postgresql'), comment='总体测试通过状态'
     )
-    test_k3orderkey_s: Mapped[str | None] = mapped_column(CHAR(32), default=None, comment='源单单号')
-    test_k3orderkey: Mapped[str | None] = mapped_column(CHAR(32), default=None, comment='单据编号')
+    test_k3orderkey_s: Mapped[str | None] = mapped_column(CHAR(32),
+                                                          comment='金蝶source源单单号，生产工单/销售订单')
+    test_k3orderkey: Mapped[str | None] = mapped_column(CHAR(32),
+                                                        comment='金蝶单据编号，生产入库单/销售出库单')
