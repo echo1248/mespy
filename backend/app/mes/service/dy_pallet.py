@@ -64,29 +64,29 @@ class DyPalletService:
 
     async def _approve_bill(self, bill_params: List[BillParam], bill_type: str) -> None:
         pallets, cartons = await self.check_bill(bill_params)
-        cartonkey_pallet_map = {row.pallet_cartonkey: row for row in pallets}
+        pallet_map = {row.pallet_cartonkey: row for row in pallets}
         bill_map = {row.pallet_pid: row for row in bill_params}
 
-        async with async_db_session.begin() as db:
-            objs = []
-            for carton in cartons:
-                pallet = cartonkey_pallet_map[carton.carton_key]
-                bill = bill_map[pallet.pallet_pid]
-                objs.append(CreateXMOH2TestParam(
-                    test_snkey=carton.carton_boxsn,
-                    test_stkey="ASSY_IS" if bill_type == "in" else "ASSY_OS",
-                    test_sttitle="成品入库" if bill_type == "in" else "成品出库",
-                    test_times_putin=1,
-                    test_pid=pallet.pallet_pid,
-                    test_skukey=pallet.pallet_key,
-                    test_skutitle=pallet.pallet_title,
-                    test_pass_1=1,
-                    test_info_1="金蝶入库",
-                    test_createdon=timezone.now(),
-                    test_k3orderkey_s=bill.k3orderkey_s,
-                    test_k3orderkey=bill.k3orderkey,
-                ))
+        objs = []
+        for carton in cartons:
+            pallet = pallet_map[carton.carton_key]
+            bill = bill_map[pallet.pallet_pid]
+            objs.append(CreateXMOH2TestParam(
+                test_snkey=carton.carton_boxsn,
+                test_stkey="ASSY_IS" if bill_type == "in" else "ASSY_OS",
+                test_sttitle="成品入库" if bill_type == "in" else "成品出库",
+                test_times_putin=1,
+                test_pid=pallet.pallet_pid,
+                test_skukey=pallet.pallet_key,
+                test_skutitle=pallet.pallet_title,
+                test_pass_1=1,
+                test_info_1="金蝶入库",
+                test_createdon=timezone.now(),
+                test_k3orderkey_s=bill.k3orderkey_s,
+                test_k3orderkey=bill.k3orderkey,
+            ))
 
+        async with async_db_session.begin() as db:
             await xm_oh2_test_dao.bulk_create(db, objs)
 
     async def _reverse_bill(self, bill_params: List[BillParam], bill_type: str):
@@ -96,8 +96,8 @@ class DyPalletService:
         async with async_db_session.begin() as db:
             await xm_oh2_test_dao.delete_model_by_column(db, allow_multiple=True, test_snkey__in=snkeys)
 
-    @staticmethod
-    async def check_bill(bill_params: List[BillParam]):
+    @classmethod
+    async def check_bill(cls, bill_params: List[BillParam]):
         """ 参数校验 """
         async with async_db_session() as db:
             pallets = []
@@ -121,71 +121,69 @@ class DyPalletService:
 
             return pallets, cartons
 
-    def get_product_map(self):
-        """ 产品映射关系 """
-        return {
-            # JM03
-            "933006": "jr_jm03_test",
-            "933007": "jr_jm03_test",
-            "933002": "jr_jm03_test",
-            "933008": "jr_jm03_test",
+    PID_MAP = {
+        # JM03
+        "933006": "jr_jm03_test",
+        "933007": "jr_jm03_test",
+        "933002": "jr_jm03_test",
+        "933008": "jr_jm03_test",
 
-            # L05B/C
-            "31833": "xm_l05b_test",
-            "31834": "xm_l05b_test",
+        # L05B/C
+        "31833": "xm_l05b_test",
+        "31834": "xm_l05b_test",
 
-            # M11A
-            "57470": "xm_m11a_test",
-            "58472": "xm_m11a_test",
-            "58473": "xm_m11a_test",
+        # M11A
+        "57470": "xm_m11a_test",
+        "58472": "xm_m11a_test",
+        "58473": "xm_m11a_test",
 
-            # OH2
-            "61346": "xm_oh2_test",
-            "73528": "xm_oh2_test",
-            "73529": "xm_oh2_test",
-            "73530": "xm_oh2_test",
-            "73531": "xm_oh2_test",
-            "73532": "xm_oh2_test",
+        # OH2
+        "61346": "xm_oh2_test",
+        "73528": "xm_oh2_test",
+        "73529": "xm_oh2_test",
+        "73530": "xm_oh2_test",
+        "73531": "xm_oh2_test",
+        "73532": "xm_oh2_test",
 
-            # OH3R
-            "66522": "xm_oh3r_test",
-            "66523": "xm_oh3r_test",
-            "70163": "xm_oh3r_test",
-            "66524": "xm_oh3r_test",
-            "66525": "xm_oh3r_test",
+        # OH3R
+        "66522": "xm_oh3r_test",
+        "66523": "xm_oh3r_test",
+        "70163": "xm_oh3r_test",
+        "66524": "xm_oh3r_test",
+        "66525": "xm_oh3r_test",
 
-            # OH11
-            "66286": "xm_oh11_test",
+        # OH11
+        "66286": "xm_oh11_test",
 
-            # X4B
-            "55119": "xm_x4b_test",
-            "69675": "xm_x4b_test",
+        # X4B
+        "55119": "xm_x4b_test",
+        "69675": "xm_x4b_test",
 
-            # X6A
-            "41052": "xm_x6a_test",
+        # X6A
+        "41052": "xm_x6a_test",
 
-            # X8C
-            "27414": "xm_x8C_test",
+        # X8C
+        "27414": "xm_x8C_test",
 
-            # X8F
-            "48350": "xm_x8f_test",
+        # X8F
+        "48350": "xm_x8f_test",
 
-            # MC601
-            "60314": "yz_mc60_01_test",
+        # MC601
+        "60314": "yz_mc60_01_test",
 
-            # MC602
-            "60317": "yz_mc601_test",
-            "63605": "yz_mc601_test",
+        # MC602
+        "60317": "yz_mc601_test",
+        "63605": "yz_mc601_test",
 
-            # xhb (小黑板)
-            "47303": "xm_xhb_test",
-            "44573": "xm_xhb_test",
-            "44574": "xm_xhb_test",
-            "28505": "xm_xhb_test",
+        # xhb (小黑板)
+        "47303": "xm_xhb_test",
+        "44573": "xm_xhb_test",
+        "44574": "xm_xhb_test",
+        "28505": "xm_xhb_test",
 
-            # K03
-            "44481": "dy_qbh4248cn_test",
-        }
+        # K03
+        "44481": "dy_qbh4248cn_test",
+    }
 
 
 dy_pallet_service: DyPalletService = DyPalletService()
