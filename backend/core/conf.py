@@ -246,6 +246,14 @@ class Settings(BaseSettings):
     EMAIL_CAPTCHA_REDIS_PREFIX: str = 'mes:email:captcha'
     EMAIL_CAPTCHA_EXPIRE_SECONDS: int = 60 * 3  # 3 分钟
 
+    APP_CONFIGS: list = [
+        {"app_key": "MES_YIDA", "app_secret": "e2a8d1b4c7f9a3", "name": "仪达外协"},
+        {"app_key": "MES_RUISEN", "app_secret": "8b3c6a9d2e5f1b", "name": "瑞森外协"},
+        {"app_key": "MES_WULIAN", "app_secret": "4d7f2a9c1b6e8d", "name": "五联外协"},
+        {"app_key": "MES_K3", "app_secret": "3a6e9c2b8d4f7a", "name": "金蝶"},
+        {"app_key": "MES_BEITONG", "app_secret": "7b2d9a4e6c8f3b", "name": "工厂上位机"},
+    ]
+
     @model_validator(mode='before')
     @classmethod
     def check_env(cls, values: Any) -> Any:

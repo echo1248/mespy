@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.admin.model import User
 from backend.app.admin.schema.user import GetUserInfoWithRelationDetail
 from backend.common.dataclasses import AccessToken, NewToken, RefreshToken, TokenPayload
+from backend.common.enums import StatusType
 from backend.common.exception import errors
 from backend.common.exception.errors import TokenError
 from backend.core.conf import settings
@@ -175,7 +176,7 @@ async def create_refresh_token(session_uuid: str, user_id: int, multi_login: boo
 
 
 async def create_new_token(
-    refresh_token: str, session_uuid: str, user_id: int, multi_login: bool, **kwargs
+        refresh_token: str, session_uuid: str, user_id: int, multi_login: bool, **kwargs
 ) -> NewToken:
     """
     生成新的 token
@@ -269,6 +270,42 @@ def superuser_verify(request: Request) -> bool:
     if not superuser or not request.user.is_staff:
         raise errors.AuthorizationError()
     return superuser
+
+
+async def app_authentication(app_key: str, app_secret: str) -> GetUserInfoWithRelationDetail:
+    """
+    APP 认证
+    """
+    if not app_key or not app_secret:
+        raise errors.TokenError(msg='缺少 AppKey 或 AppSecret')
+
+    app = next(
+        (app for app in settings.APP_CONFIGS
+         if app["app_key"] == app_key and app["app_secret"] == app_secret),
+        None
+    )
+
+    if not app:
+        raise errors.TokenError(msg='无效的 AppKey 或 AppSecret')
+
+    return GetUserInfoWithRelationDetail(
+        id=0,
+        uuid="550e8400-e29b-41d4-a716-446655440000",
+        username=app["name"],
+        nickname=app["name"],
+        avatar=None,
+        email=None,
+        phone="",
+        status=StatusType.enable,
+        is_superuser=False,
+        is_staff=True,
+        is_multi_login=True,
+        join_time=datetime.now(),
+        last_login_time=datetime.now(),
+        dept_id=None,
+        dept=None,
+        roles=[]
+    )
 
 
 async def jwt_authentication(token: str) -> GetUserInfoWithRelationDetail:

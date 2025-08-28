@@ -10,7 +10,7 @@ from starlette.requests import HTTPConnection
 from backend.app.admin.schema.user import GetUserInfoWithRelationDetail
 from backend.common.exception.errors import TokenError
 from backend.common.log import log
-from backend.common.security.jwt import jwt_authentication
+from backend.common.security.jwt import jwt_authentication, app_authentication
 from backend.core.conf import settings
 from backend.utils.serializers import MsgSpecJSONResponse
 
@@ -19,7 +19,7 @@ class _AuthenticationError(AuthenticationError):
     """重写内部认证错误类"""
 
     def __init__(
-        self, *, code: int | None = None, msg: str | None = None, headers: dict[str, Any] | None = None
+            self, *, code: int | None = None, msg: str | None = None, headers: dict[str, Any] | None = None
     ) -> None:
         """
         初始化认证错误
@@ -55,6 +55,18 @@ class JwtAuthMiddleware(AuthenticationBackend):
         :param request: FastAPI 请求对象
         :return:
         """
+        app_key = request.headers.get('AppKey')
+        app_secret = request.headers.get('AppSecret')
+        if app_key or app_secret:
+            try:
+                user = await app_authentication(app_key, app_secret)
+            except TokenError as exc:
+                raise _AuthenticationError(code=exc.code, msg=exc.detail, headers=exc.headers)
+            except Exception as e:
+                log.exception(f'AppKey & AppSecret 授权异常：{e}')
+                raise _AuthenticationError(code=getattr(e, 'code', 500), msg=getattr(e, 'msg', 'Internal Server Error'))
+            return AuthCredentials(['authenticated']), user
+
         token = request.headers.get('Authorization')
         if not token:
             return None
