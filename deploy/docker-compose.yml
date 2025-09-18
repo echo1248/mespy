@@ -47,6 +47,70 @@ services:
     networks:
       - jiqid_net
 
+  emqx-enterprise:
+    restart: unless-stopped
+    image: emqx/emqx-enterprise:5.10.1-rc.2
+    container_name: emqx
+    environment:
+      # 设置 EMQX 节点的名称
+      - EMQX_NODE_NAME=emqx@node1.emqx.io
+      # 允许所有网络连接（用于测试，生产环境应设置更严格的规则）
+      - EMQX_LISTENERS__TCP__DEFAULT__BIND=0.0.0.0:1883
+      - EMQX_LISTENERS__SSL__DEFAULT__BIND=0.0.0.0:8883
+      - EMQX_LISTENERS__WS__DEFAULT__BIND=0.0.0.0:8083
+      - EMQX_LISTENERS__WSS__DEFAULT__BIND=0.0.0.0:8084
+      # 设置 Dashboard 管理后台的默认用户名和密码
+      - EMQX_DASHBOARD__DEFAULT_USERNAME=admin
+      - EMQX_DASHBOARD__DEFAULT_PASSWORD=Qkxc123456
+    healthcheck:
+      test: [ "CMD", "/opt/emqx/bin/emqx", "ctl", "status" ]
+      interval: 5s
+      timeout: 25s
+      retries: 5
+    ports:
+      - "1883:1883"
+      - "8083:8083"
+      - "8084:8084"
+      - "8883:8883"
+      - "18083:18083"
+    volumes:
+      - /opt/mes/emqx/data:/opt/emqx/data
+      - /opt/mes/emqx/log:/opt/emqx/log
+    networks:
+      - jiqid_net
+
+  emqx:
+    restart: unless-stopped
+    image: emqx:lastest
+    container_name: emqx
+    environment:
+      # 设置 EMQX 节点的名称
+      - EMQX_NODE_NAME=emqx@node1.emqx.io
+      # 允许所有网络连接（用于测试，生产环境应设置更严格的规则）
+      - EMQX_LISTENERS__TCP__DEFAULT__BIND=0.0.0.0:1883
+      - EMQX_LISTENERS__SSL__DEFAULT__BIND=0.0.0.0:8883
+      - EMQX_LISTENERS__WS__DEFAULT__BIND=0.0.0.0:8083
+      - EMQX_LISTENERS__WSS__DEFAULT__BIND=0.0.0.0:8084
+      # 设置 Dashboard 管理后台的默认用户名和密码
+      - EMQX_DASHBOARD__DEFAULT_USERNAME=admin
+      - EMQX_DASHBOARD__DEFAULT_PASSWORD=Qkxc123456
+    healthcheck:
+      test: [ "CMD", "/opt/emqx/bin/emqx", "ctl", "status" ]
+      interval: 5s
+      timeout: 25s
+      retries: 5
+    ports:
+      - "1883:1883"
+      - "8083:8083"
+      - "8084:8084"
+      - "8883:8883"
+      - "18083:18083"
+    volumes:
+      - /opt/mes/emqx/data:/opt/emqx/data
+      - /opt/mes/emqx/log:/opt/emqx/log
+    networks:
+      - jiqid_net
+
 networks:
   jiqid_net:
     driver: bridge
