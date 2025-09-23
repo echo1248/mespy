@@ -102,8 +102,8 @@ class DyPalletService:
         async with async_db_session() as db:
             pallets = []
             for item in bill_params:
-                if item.pallet_pid not in ("61346",):
-                    raise errors.ForbiddenError(msg=f'参数错误[pallet_pid={item.pallet_pid}]')
+                # if item.pallet_pid not in ("61346",):
+                #     raise errors.ForbiddenError(msg=f'参数错误[pallet_pid={item.pallet_pid}]')
 
                 rows = await dy_pallet_dao.select_models(db, pallet_key__eq=item.pallet_key)
                 if not rows:

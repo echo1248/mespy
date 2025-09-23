@@ -81,7 +81,7 @@ services:
 
   emqx:
     restart: unless-stopped
-    image: emqx:lastest
+    image: emqx
     container_name: emqx
     environment:
       # 设置 EMQX 节点的名称
