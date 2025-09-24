@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import time
 from typing import List, Sequence
 from dataclasses import dataclass
 
@@ -35,7 +34,6 @@ from backend.app.mes.schema.prod.xm_x8c_test import CreateXMX8CTestParam
 from backend.app.mes.schema.prod.xm_x8f_test import CreateXMX8FTestParam
 from backend.app.mes.schema.prod.xm_xhb_test import CreateXMXHBTestParam
 from backend.common.exception import errors
-from backend.common.log import log
 from backend.database.db import async_db_session
 from backend.utils.timezone import timezone
 
@@ -243,6 +241,10 @@ class DyPalletService:
         if first_pid not in self.PID_MAP:
             raise errors.ForbiddenError(msg=f'不支持的产品ID: {first_pid}')
 
+        is_dup = self._check_duplicates(bill_params)
+        if is_dup:
+            raise errors.RequestError(msg="存在重复的栈板号")
+
         error_list = []
         async with async_db_session() as db:
             # 批量查询栈板信息
@@ -268,6 +270,21 @@ class DyPalletService:
             cartons = await dy_carton_dao.select_models(db, carton_key__in=carton_keys)
 
             return valid_pallets, cartons, error_list
+
+    def _check_duplicates(self, bill_params: List[BillParam]) -> bool:
+        """ 快速检查是否存在重复参数 """
+        # 检查对象完全重复
+        param_tuples = [tuple(param.model_dump().items()) for param in bill_params]
+        if len(param_tuples) != len(set(param_tuples)):
+            return True
+
+        # 检查关键字段重复
+        for field in ['pallet_pid', 'pallet_key', 'k3orderkey_s', 'k3orderkey']:
+            values = [getattr(param, field) for param in bill_params if getattr(param, field)]
+            if len(values) != len(set(values)):
+                return True
+
+        return False
 
     @classmethod
     def get_supported_pids(cls) -> List[str]:
