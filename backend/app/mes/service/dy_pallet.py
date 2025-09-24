@@ -8,6 +8,7 @@ from sqlalchemy import Select
 
 from backend.app.mes.crud.crud_dy_carton import dy_carton_dao
 from backend.app.mes.crud.crud_dy_pallet import dy_pallet_dao
+from backend.app.mes.crud.prod.crud_dy_qbh4248cn_test import dy_qbh4248cn_test_dao
 from backend.app.mes.crud.prod.crud_jr_jm03_test import jr_jm03_test_dao
 from backend.app.mes.crud.prod.crud_xm_l0b5_test import xm_l05b_test_dao
 from backend.app.mes.crud.prod.crud_xm_m11a_test import xm_m11a_test_dao
@@ -18,8 +19,10 @@ from backend.app.mes.crud.prod.crud_xm_x4b_test import xm_x4b_test_dao
 from backend.app.mes.crud.prod.crud_xm_x6a_test import xm_x6a_test_dao
 from backend.app.mes.crud.prod.crud_xm_x8c_test import xm_x8c_test_dao
 from backend.app.mes.crud.prod.crud_xm_x8f_test import xm_x8f_test_dao
+from backend.app.mes.crud.prod.crud_xm_xhb_test import xm_xhb_test_dao
 from backend.app.mes.model import DyPallet, DyCarton
 from backend.app.mes.schema.dy_pallet import CreateDyPalletParam, DeleteDyPalletParam, BillParam
+from backend.app.mes.schema.prod.dy_qbh4248cn_test import CreateDyQBH4248CNTestParam
 from backend.app.mes.schema.prod.jr_jm03_test import CreateJRJM03TestParam
 from backend.app.mes.schema.prod.xm_l05b_test import CreateXML05BTestParam
 from backend.app.mes.schema.prod.xm_m11a_test import CreateXMM11ATestParam
@@ -30,6 +33,7 @@ from backend.app.mes.schema.prod.xm_x4b_test import CreateXMX4BTestParam
 from backend.app.mes.schema.prod.xm_x6a_test import CreateXMX6ATestParam
 from backend.app.mes.schema.prod.xm_x8c_test import CreateXMX8CTestParam
 from backend.app.mes.schema.prod.xm_x8f_test import CreateXMX8FTestParam
+from backend.app.mes.schema.prod.xm_xhb_test import CreateXMXHBTestParam
 from backend.common.exception import errors
 from backend.common.log import log
 from backend.database.db import async_db_session
@@ -85,6 +89,12 @@ class DyPalletService:
 
         # X8F
         "48350": xm_x8f_test_dao,
+
+        # QBH
+        "44481": dy_qbh4248cn_test_dao,
+
+        # XHB
+        "47303": xm_xhb_test_dao, "44573": xm_xhb_test_dao, "44574": xm_xhb_test_dao, "28505": xm_xhb_test_dao,
     }
 
     # 参数类型映射
@@ -99,6 +109,8 @@ class DyPalletService:
         xm_x6a_test_dao: CreateXMX6ATestParam,
         xm_x8c_test_dao: CreateXMX8CTestParam,
         xm_x8f_test_dao: CreateXMX8FTestParam,
+        dy_qbh4248cn_test_dao: CreateDyQBH4248CNTestParam,
+        xm_xhb_test_dao: CreateXMXHBTestParam,
     }
 
     @staticmethod
@@ -194,6 +206,8 @@ class DyPalletService:
                 "test_skukey": pallet.pallet_key,
                 "test_skutitle": pallet.pallet_title,
                 "test_pass_1": 1,
+                "test_pass_on1": timezone.now(),
+                "test_pass_testedby1": "MES",
                 "test_info_1": config.test_info_1,
                 "test_createdon": timezone.now(),
                 "test_k3orderkey_s": bill.k3orderkey_s,

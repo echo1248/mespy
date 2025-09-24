@@ -20,6 +20,8 @@ from backend.app.mes.api.v1.prod.xm_x8c_test import router as xm_x8c
 from backend.app.mes.api.v1.prod.xm_x8f_test import router as xm_x8f
 from backend.app.mes.api.v1.prod.yz_mc60_01_test import router as yz_mc60_01
 from backend.app.mes.api.v1.prod.yz_mc601_test import router as yz_mc601
+from backend.app.mes.api.v1.prod.xm_xhb_test import router as xm_xhb
+from backend.app.mes.api.v1.prod.dy_qbh4248cn_test import router as dy_qbh4248cn
 
 router = APIRouter(prefix='/prod')
 
@@ -35,3 +37,5 @@ router.include_router(xm_x8c, prefix='/xm_x8c', tags=['xm_x8c'])
 router.include_router(xm_x8f, prefix='/xm_x8f', tags=['xm_x8f'])
 router.include_router(yz_mc60_01, prefix='/yz_mc60_01', tags=['yz_mc60_01'])
 router.include_router(yz_mc601, prefix='/yz_mc601', tags=['yz_mc601'])
+router.include_router(xm_xhb, prefix='/xm_xhb', tags=['xm_xhb'])
+router.include_router(dy_qbh4248cn, prefix='/dy_qbh4248cn', tags=['dy_qbh4248cn'])

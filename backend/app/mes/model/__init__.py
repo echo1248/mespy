@@ -21,3 +21,5 @@ from backend.app.mes.model.prod.xm_x8c_test import XMX8CTest
 from backend.app.mes.model.prod.xm_x8f_test import XMX8FTest
 from backend.app.mes.model.prod.yz_mc60_01_test import YZMC6001Test
 from backend.app.mes.model.prod.yz_mc601_test import YZMC601Test
+from backend.app.mes.model.prod.dy_qbh4248cn_test import DyQBH4248CNTest
+from backend.app.mes.model.prod.xm_xhb_test import XMXHBTest
