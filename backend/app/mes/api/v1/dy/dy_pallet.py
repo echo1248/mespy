@@ -25,8 +25,8 @@ async def approve_in_bill(
         db: CurrentSession,
         bill_params: BillParamList,
 ) -> ResponseModel:
-    await dy_pallet_service.approve_in_bill(bill_params=bill_params.items)
-    return response_base.success()
+    data = await dy_pallet_service.approve_in_bill(bill_params=bill_params.items)
+    return response_base.success(data=data)
 
 
 @router.post(
@@ -39,8 +39,8 @@ async def reverse_in_bill(
         db: CurrentSession,
         bill_params: BillParamList,
 ) -> ResponseModel:
-    await dy_pallet_service.reverse_in_bill(bill_params=bill_params.items)
-    return response_base.success()
+    data = await dy_pallet_service.reverse_in_bill(bill_params=bill_params.items)
+    return response_base.success(data=data)
 
 
 @router.post(
@@ -53,8 +53,8 @@ async def approve_out_bill(
         db: CurrentSession,
         bill_params: BillParamList,
 ) -> ResponseModel:
-    await dy_pallet_service.approve_out_bill(bill_params=bill_params.items)
-    return response_base.success()
+    data = await dy_pallet_service.approve_out_bill(bill_params=bill_params.items)
+    return response_base.success(data=data)
 
 
 @router.post(
@@ -67,8 +67,8 @@ async def reverse_out_bill(
         db: CurrentSession,
         bill_params: BillParamList,
 ) -> ResponseModel:
-    await dy_pallet_service.reverse_out_bill(bill_params=bill_params.items)
-    return response_base.success()
+    data = await dy_pallet_service.reverse_out_bill(bill_params=bill_params.items)
+    return response_base.success(data=data)
 
 
 @router.get(

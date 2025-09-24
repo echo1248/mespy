@@ -140,33 +140,35 @@ class DyPalletService:
         async with async_db_session.begin() as db:
             await dy_pallet_dao.delete_all(db)
 
-    async def approve_in_bill(self, bill_params: List[BillParam]) -> None:
+    async def approve_in_bill(self, bill_params: List[BillParam]) -> List:
         """审核入库单据"""
-        await self._process_bill(bill_params, "in", is_reverse=False)
+        return await self._process_bill(bill_params, "in", is_reverse=False)
 
-    async def approve_out_bill(self, bill_params: List[BillParam]) -> None:
+    async def approve_out_bill(self, bill_params: List[BillParam]) -> List:
         """审核出库单据"""
-        await self._process_bill(bill_params, "out", is_reverse=False)
+        return await self._process_bill(bill_params, "out", is_reverse=False)
 
-    async def reverse_in_bill(self, bill_params: List[BillParam]) -> None:
+    async def reverse_in_bill(self, bill_params: List[BillParam]) -> List:
         """撤销入库单据"""
-        await self._process_bill(bill_params, "in", is_reverse=True)
+        return await self._process_bill(bill_params, "in", is_reverse=True)
 
-    async def reverse_out_bill(self, bill_params: List[BillParam]) -> None:
+    async def reverse_out_bill(self, bill_params: List[BillParam]) -> List:
         """撤销出库单据"""
-        await self._process_bill(bill_params, "out", is_reverse=True)
+        return await self._process_bill(bill_params, "out", is_reverse=True)
 
-    async def _process_bill(self, bill_params: List[BillParam], bill_type: str, is_reverse: bool) -> None:
+    async def _process_bill(self, bill_params: List[BillParam], bill_type: str, is_reverse: bool) -> List:
         """处理单据的核心方法"""
-        if not bill_params:
-            raise errors.RequestError(msg="单据参数不能为空")
+        pallets, cartons, error_list = await self._validate_bill_params(bill_params)
 
-        pallets, cartons = await self._validate_bill_params(bill_params)
+        if any([item["msg"] is not None for item in error_list]):  # 存在错误信息，不进行数据库操作
+            return error_list
 
         if is_reverse:
             await self._reverse_bill_operation(cartons, bill_params[0].pallet_pid)
         else:
             await self._approve_bill_operation(pallets, cartons, bill_params, bill_type)
+
+        return error_list
 
     async def _approve_bill_operation(self, pallets: List[DyPallet], cartons: Sequence[DyCarton],
                                       bill_params: List[BillParam], bill_type: str) -> None:
@@ -205,11 +207,8 @@ class DyPalletService:
         param_class = self.CREATE_PARAM_MAP[prod_dao]
         param_objs = [param_class(**obj) for obj in create_objs]
 
-        start_at = time.time()
         async with async_db_session.begin() as db:
             await prod_dao.bulk_create(db, param_objs)
-
-        log.debug(f"批量插入数据: {len(param_objs)}，耗时：{time.time() - start_at}")
 
     async def _reverse_bill_operation(self, cartons: Sequence[DyCarton], pallet_pid: str) -> None:
         """执行冲销单据操作"""
@@ -221,7 +220,7 @@ class DyPalletService:
                 db, allow_multiple=True, test_snkey__in=sn_keys
             )
 
-    async def _validate_bill_params(self, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence]:
+    async def _validate_bill_params(self, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence, List]:
         """验证单据参数并获取相关数据"""
         if not bill_params:
             raise errors.RequestError(msg="单据参数不能为空")
@@ -230,6 +229,7 @@ class DyPalletService:
         if first_pid not in self.PID_MAP:
             raise errors.ForbiddenError(msg=f'不支持的产品ID: {first_pid}')
 
+        error_list = []
         async with async_db_session() as db:
             # 批量查询栈板信息
             pallet_keys = [item.pallet_key for item in bill_params]
@@ -242,18 +242,18 @@ class DyPalletService:
                     p for p in all_pallets
                     if p.pallet_key == item.pallet_key and p.pallet_pid == item.pallet_pid
                 ]
-
                 if not matching_pallets:
-                    raise errors.NotFoundError(
-                        msg=f'数据不存在[pallet_key={item.pallet_key}, pallet_pid={item.pallet_pid}]'
-                    )
+                    error_list.append({"msg": "PID不存在或栈板号不存在", **item.model_dump()})
+                    continue
+
                 valid_pallets.extend(matching_pallets)
+                error_list.append({"msg": None, **item.model_dump()})
 
             # 批量查询箱信息
             carton_keys = [pallet.pallet_cartonkey for pallet in valid_pallets]
             cartons = await dy_carton_dao.select_models(db, carton_key__in=carton_keys)
 
-            return valid_pallets, cartons
+            return valid_pallets, cartons, error_list
 
     @classmethod
     def get_supported_pids(cls) -> List[str]:
