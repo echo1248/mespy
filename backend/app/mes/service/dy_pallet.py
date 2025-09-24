@@ -241,9 +241,7 @@ class DyPalletService:
         if first_pid not in self.PID_MAP:
             raise errors.ForbiddenError(msg=f'不支持的产品ID: {first_pid}')
 
-        is_dup = self._check_duplicates(bill_params)
-        if is_dup:
-            raise errors.RequestError(msg="存在重复的栈板号")
+        self._check_duplicates(bill_params)
 
         error_list = []
         async with async_db_session() as db:
@@ -271,20 +269,18 @@ class DyPalletService:
 
             return valid_pallets, cartons, error_list
 
-    def _check_duplicates(self, bill_params: List[BillParam]) -> bool:
-        """ 快速检查是否存在重复参数 """
-        # 检查对象完全重复
-        param_tuples = [tuple(param.model_dump().items()) for param in bill_params]
-        if len(param_tuples) != len(set(param_tuples)):
-            return True
+    def _check_duplicates(self, bill_params: List[BillParam]) -> None:
+        """快速检查是否存在重复参数"""
+        pallet_keys = set()
 
-        # 检查关键字段重复
-        for field in ['pallet_pid', 'pallet_key', 'k3orderkey_s', 'k3orderkey']:
-            values = [getattr(param, field) for param in bill_params if getattr(param, field)]
-            if len(values) != len(set(values)):
-                return True
+        for param in bill_params:
+            pallet_key = getattr(param, 'pallet_key', None)
+            if not pallet_key:
+                raise errors.RequestError(msg=f"栈板号为空")
 
-        return False
+            if pallet_key in pallet_keys:
+                raise errors.RequestError(msg=f"存在重复的栈板号: {pallet_key}")
+            pallet_keys.add(pallet_key)
 
     @classmethod
     def get_supported_pids(cls) -> List[str]:
