@@ -249,26 +249,22 @@ class DyPalletService:
         self._check_duplicates(bill_params)
 
         async with async_db_session() as db:
-            # 批量查询栈板信息
             pallet_keys = [item.pallet_key for item in bill_params]
-            all_pallets = await dy_pallet_dao.select_models(
-                db, pallet_key__in=pallet_keys
-            )
-
-            # 创建查找字典提高查询效率
-            pallet_dict = {(p.pallet_key, p.pallet_pid): p for p in all_pallets}
+            all_pallets = await dy_pallet_dao.select_models(db, pallet_key__in=pallet_keys)
 
             error_list = []
             valid_pallets = []
-
             for param in bill_params:
-                pallet = pallet_dict.get((param.pallet_key, param.pallet_pid))
-
-                if not pallet:
+                matching_pallets = [
+                    p for p in all_pallets
+                    if p.pallet_key == param.pallet_key and p.pallet_pid == param.pallet_pid
+                ]
+                if not matching_pallets:
                     error_list.append({"msg": "PID不存在或栈板号不存在", **param.model_dump()})
-                else:
-                    valid_pallets.append(pallet)
-                    error_list.append({"msg": None, **param.model_dump()})
+                    continue
+
+                valid_pallets.extend(matching_pallets)
+                error_list.append({"msg": None, **param.model_dump()})
 
             # 如果有错误立即返回，避免不必要的数据库查询
             if error_list and any(item["msg"] for item in error_list):
@@ -278,7 +274,7 @@ class DyPalletService:
             carton_keys = [pallet.pallet_cartonkey for pallet in valid_pallets]
             cartons = await dy_carton_dao.select_models(
                 db, carton_key__in=carton_keys
-            ) if valid_pallets else []
+            ) if carton_keys else []
 
             return valid_pallets, cartons
 
