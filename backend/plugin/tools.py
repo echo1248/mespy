@@ -23,7 +23,7 @@ from backend.core.conf import settings
 from backend.core.path_conf import PLUGIN_DIR
 from backend.database.redis import RedisCli, redis_client
 from backend.utils._await import run_await
-from backend.utils.import_parse import get_model_object, import_module_cached
+from backend.utils.import_parse import get_model_objects, import_module_cached
 
 
 class PluginConfigError(Exception):
@@ -63,9 +63,9 @@ def get_plugin_models() -> list[type]:
 
     for plugin in get_plugins():
         module_path = f'backend.plugin.{plugin}.model'
-        obj = get_model_object(module_path)
+        obj = get_model_objects(module_path)
         if obj:
-            objs.append(obj)
+            objs.extend(obj)
 
     return objs
 
@@ -319,9 +319,7 @@ def install_requirements(plugin: str | None) -> None:
                 pip_install = [sys.executable, '-m', 'pip', 'install', '-r', requirements_file]
                 if settings.PLUGIN_PIP_CHINA:
                     pip_install.extend(['-i', settings.PLUGIN_PIP_INDEX_URL])
-                subprocess.check_call(
-                    ensurepip_install, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True
-                )
+                subprocess.check_call(ensurepip_install, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 subprocess.check_call(pip_install, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except subprocess.CalledProcessError as e:
                 raise PluginInstallError(f'插件 {plugin} 依赖安装失败：{e}') from e
