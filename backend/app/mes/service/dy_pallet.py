@@ -187,9 +187,11 @@ class DyPalletService:
         create_objs = []
         for carton in cartons:
             pallet = pallet_map.get(carton.carton_key)
-            bill = bill_map.get(pallet.pallet_pid) if pallet else None
+            if pallet is None:
+                continue
 
-            if not pallet or not bill:
+            bill = bill_map.get(pallet.pallet_pid)
+            if bill is None:
                 continue
 
             create_objs.append({
@@ -212,12 +214,12 @@ class DyPalletService:
         if not create_objs:
             raise errors.NotFoundError(msg="未找到对应的栈板和箱信息")
 
-        for item in bill_params:  # 遍历单据参数，获取对应的产品DAO和参数类
-            prod_dao = self.PID_MAP[item.pallet_pid]
+        for param in bill_params:  # 遍历单据参数，获取对应的产品DAO和参数类
+            prod_dao = self.PID_MAP[param.pallet_pid]
             param_class = self.CREATE_PARAM_MAP[prod_dao]
-            param_objs = [param_class(**obj) for obj in create_objs if obj["test_skukey"] == item.pallet_key]
+            param_objs = [param_class(**obj) for obj in create_objs if obj["test_skukey"] == param.pallet_key]
             if not param_objs:
-                log.warning(f"未找到对应的栈板和箱信息: {item}")
+                log.warning(f"未找到对应的栈板和箱信息: {param}")
                 continue
 
             async with async_db_session.begin() as db:
@@ -259,17 +261,14 @@ class DyPalletService:
             error_list = []
             valid_pallets = []
 
-            for item in bill_params:
-                pallet = pallet_dict.get((item.pallet_key, item.pallet_pid))
+            for param in bill_params:
+                pallet = pallet_dict.get((param.pallet_key, param.pallet_pid))
 
                 if not pallet:
-                    error_list.append({
-                        "msg": "PID不存在或栈板号不存在",
-                        **item.model_dump()
-                    })
+                    error_list.append({"msg": "PID不存在或栈板号不存在", **param.model_dump()})
                 else:
                     valid_pallets.append(pallet)
-                    error_list.append({"msg": None, **item.model_dump()})
+                    error_list.append({"msg": None, **param.model_dump()})
 
             # 如果有错误立即返回，避免不必要的数据库查询
             if error_list and any(item["msg"] for item in error_list):
@@ -288,13 +287,12 @@ class DyPalletService:
         pallet_keys = set()
 
         for param in bill_params:
-            pallet_key = getattr(param, 'pallet_key', None)
-            if not pallet_key:
+            if not param.pallet_key:
                 raise errors.RequestError(msg=f"栈板号为空")
 
-            if pallet_key in pallet_keys:
-                raise errors.RequestError(msg=f"存在重复的栈板号: {pallet_key}")
-            pallet_keys.add(pallet_key)
+            if param.pallet_key in pallet_keys:
+                raise errors.RequestError(msg=f"存在重复的栈板号: {param.pallet_key}")
+            pallet_keys.add(param.pallet_key)
 
     @classmethod
     def get_supported_pids(cls) -> List[str]:
