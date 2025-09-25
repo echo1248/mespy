@@ -217,13 +217,18 @@ class DyPalletService:
         for param in bill_params:  # 遍历单据参数，获取对应的产品DAO和参数类
             prod_dao = self.PID_MAP[param.pallet_pid]
             param_class = self.CREATE_PARAM_MAP[prod_dao]
-            param_objs = [param_class(**obj) for obj in create_objs if obj["test_skukey"] == param.pallet_key]
-            if not param_objs:
+            instances = [param_class(**obj) for obj in create_objs if obj["test_skukey"] == param.pallet_key]
+            if not instances:
                 log.warning(f"未找到对应的栈板和箱信息: {param}")
                 continue
 
             async with async_db_session.begin() as db:
-                await prod_dao.bulk_create(db, param_objs)
+                data_dicts = [instance.__dict__ for instance in instances]
+                await db.execute(
+                    prod_dao.model.__table__.insert(),
+                    data_dicts
+                )
+                # await prod_dao.bulk_create(db, param_objs)
 
     async def _reverse_bill_operation(self, cartons: Sequence[DyCarton], pallet_pid: str) -> None:
         """执行冲销单据操作"""
