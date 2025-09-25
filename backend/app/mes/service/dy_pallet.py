@@ -4,7 +4,7 @@ import json
 from typing import List, Sequence
 from dataclasses import dataclass
 
-from sqlalchemy import Select
+from sqlalchemy import Select, insert
 
 from backend.app.mes.crud.crud_dy_carton import dy_carton_dao
 from backend.app.mes.crud.crud_dy_pallet import dy_pallet_dao
@@ -224,11 +224,7 @@ class DyPalletService:
 
             async with async_db_session.begin() as db:
                 data_dicts = [instance.__dict__ for instance in instances]
-                await db.execute(
-                    prod_dao.model.__table__.insert(),
-                    data_dicts
-                )
-                # await prod_dao.bulk_create(db, param_objs)
+                await db.execute(prod_dao.model.__table__.insert(), data_dicts)  # noqa 优化批量插入
 
     async def _reverse_bill_operation(self, cartons: Sequence[DyCarton], pallet_pid: str) -> None:
         """执行冲销单据操作"""
