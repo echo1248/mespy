@@ -4,7 +4,7 @@ set -euo pipefail
 # ======================
 # 配置区（与 supervisor 配置一致）
 # ======================
-CONFIG_NAME="mes_services.conf"
+CONFIG_NAME="llm_services.conf"
 SUPERVISOR_DIR="/etc/supervisor/conf.d"
 BASE_PATH="/opt/mes"
 
@@ -12,19 +12,20 @@ BASE_PATH="/opt/mes"
 # 语言项目目录配置
 # ======================
 declare -A PROJECT_ROOTS=(
-    ["mes"]="${BASE_PATH}/service/mespy"
+    ["alpha"]="${BASE_PATH}/alpha/mespy"  # 测试服务
+    ["prod"]="${BASE_PATH}/prod/mespy"  # 生产服务
 )
 
 declare -A SERVICES=(
-    ["8000"]="mes_services:mes_8000"
-    ["8100"]="mes_services:mes_8100"
+    ["alpha"]="llm_services:mes_alpha_8000"
+    ["prod"]="llm_services:mes_prod_8100"
 )
 
-# 反向映射，用于验证
-declare -A SERVICE_PORTS
-for port in "${!SERVICES[@]}"; do
-    SERVICE_PORTS["${SERVICES[$port]}"]=$port
-done
+# 服务端口映射（用于显示）
+declare -A SERVICE_PORTS=(
+    ["alpha"]="8000"
+    ["prod"]="8100"
+)
 
 # ======================
 # 日志配置
@@ -39,6 +40,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 log() {
@@ -60,6 +62,9 @@ log() {
         "SUCCESS")
             colored_message="${GREEN}[成功]${NC} $message"
             ;;
+        "DEBUG")
+            colored_message="${CYAN}[调试]${NC} $message"
+            ;;
         *)
             colored_message="$message"
             ;;
@@ -74,17 +79,18 @@ log() {
 git_update() {
     local project_dir="$1"
     local service_code="$2"
+    local port="${SERVICE_PORTS[$service_code]}"
 
     if [ ! -d "${project_dir}/.git" ]; then
-        log "WARN" "${service_code}: 非 Git 仓库，跳过更新"
+        log "WARN" "${service_code}(${port}): 非 Git 仓库，跳过更新"
         return 0
     fi
 
-    log "INFO" "${service_code}: 正在更新 Git 仓库 (${project_dir})"
+    log "INFO" "${service_code}(${port}): 正在更新 Git 仓库 (${project_dir})"
 
     # 检查是否有未提交的更改
     if ! git -C "$project_dir" diff --quiet; then
-        log "WARN" "${service_code}: 存在未提交的更改，尝试暂存"
+        log "WARN" "${service_code}(${port}): 存在未提交的更改，尝试暂存"
         git -C "$project_dir" stash
     fi
 
@@ -93,18 +99,18 @@ git_update() {
 
     # 获取最新变更
     if ! git -C "$project_dir" fetch --all --quiet; then
-        log "ERROR" "${service_code}: Git fetch 失败"
+        log "ERROR" "${service_code}(${port}): Git fetch 失败"
         return 1
     fi
 
     # 拉取最新代码
     if ! git -C "$project_dir" pull origin "$current_branch" --quiet; then
-        log "ERROR" "${service_code}: Git pull 失败"
+        log "ERROR" "${service_code}(${port}): Git pull 失败"
         return 1
     fi
 
-    local latest_commit=$(git -C "$project_dir" log --oneline -1)
-    log "SUCCESS" "${service_code}: 成功更新到最新版本 (分支: ${current_branch}, 最新提交: ${latest_commit})"
+    local latest_commit=$(git -C "$project_dir" log --oneline -1 2>/dev/null || echo "unknown")
+    log "SUCCESS" "${service_code}(${port}): 成功更新 (分支: ${current_branch}, 提交: ${latest_commit})"
     return 0
 }
 
@@ -131,7 +137,7 @@ check_dependencies() {
 }
 
 deploy_config() {
-    local config_source="${PROJECT_ROOTS[mes]}/deploy/${CONFIG_NAME}"
+    local config_source="${PROJECT_ROOTS[zh]}/deploy/${CONFIG_NAME}"
 
     if [ ! -f "$config_source" ]; then
         log "ERROR" "配置文件不存在: $config_source"
@@ -169,24 +175,34 @@ restart_services() {
     local services=("$@")
 
     for service in "${services[@]}"; do
-        log "INFO" "正在重启服务 $service..."
+        local service_code=""
+        for code in "${!SERVICES[@]}"; do
+            if [ "${SERVICES[$code]}" = "$service" ]; then
+                service_code=$code
+                break
+            fi
+        done
+
+        local port="${SERVICE_PORTS[$service_code]}"
+
+        log "INFO" "${service_code}(${port}): 正在重启服务..."
 
         if ! sudo supervisorctl restart "$service"; then
-            log "ERROR" "服务 $service 重启失败"
+            log "ERROR" "${service_code}(${port}): 服务重启失败"
             return 1
         fi
 
         # 等待一段时间让服务启动
-        sleep 2
+        sleep 3
 
         # 检查服务状态
         local status_info=$(sudo supervisorctl status "$service")
         local status=$(echo "$status_info" | awk '{print $2}')
 
         if [ "$status" == "RUNNING" ]; then
-            log "SUCCESS" "服务 $service 重启成功 (状态: $status)"
+            log "SUCCESS" "${service_code}(${port}): 服务重启成功"
         else
-            log "ERROR" "服务 $service 状态异常: $status_info"
+            log "ERROR" "${service_code}(${port}): 服务状态异常 - $status_info"
             return 1
         fi
     done
@@ -198,27 +214,27 @@ restart_services() {
 # 使用说明
 # ======================
 usage() {
-    echo -e "${GREEN}使用方法: $0 [选项] [服务端口...]${NC}"
+    echo -e "${GREEN}使用方法: $0 [选项] [服务代码...]${NC}"
     echo "选项:"
-    echo "  -h, --help        显示帮助信息"
-    echo "  -g, --git         重启前更新 Git 仓库"
-    echo "  -l, --list        显示可用的服务端口"
-    echo "服务端口:"
-    for port in "${!SERVICES[@]}"; do
-        echo "  $port              ${SERVICES[$port]}"
+    echo "  -h, --help      显示帮助信息"
+    echo "  -g, --git       重启前更新 Git 仓库"
+    echo "  -l, --list      显示可用的服务"
+    echo "服务代码:"
+    for code in "${!SERVICES[@]}"; do
+        echo "  $code              ${SERVICES[$code]} (端口: ${SERVICE_PORTS[$code]})"
     done
     echo ""
     echo "示例:"
-    echo "  $0 8000 8100       # 重启指定端口服务"
-    echo "  $0 -g 8000 8100    # 更新代码并重启指定端口服务"
-    echo "  $0                 # 重启所有服务"
+    echo "  $0 alpha prod     # 重启测试和生产服务"
+    echo "  $0 -g alpha prod  # 更新代码并重启中文/英文服务"
+    echo "  $0                # 重启所有服务"
     exit 0
 }
 
 list_services() {
-    echo -e "${GREEN}可用的服务端口:${NC}"
-    for port in "${!SERVICES[@]}"; do
-        echo "  $port -> ${SERVICES[$port]}"
+    echo -e "${GREEN}可用的服务:${NC}"
+    for code in "${!SERVICES[@]}"; do
+        echo -e "  ${CYAN}${code}${NC} -> ${SERVICES[$code]} (端口: ${SERVICE_PORTS[$code]})"
     done
     exit 0
 }
@@ -247,7 +263,7 @@ main() {
                 if [[ -v SERVICES["$1"] ]]; then
                     RESTART_SERVICES+=("$1")
                 else
-                    log "ERROR" "未知的服务端口: $1"
+                    log "ERROR" "未知的服务代码: $1"
                     usage
                     exit 1
                 fi
@@ -256,7 +272,7 @@ main() {
         esac
     done
 
-    log "INFO" "========== 开始部署 =========="
+    log "INFO" "========== 开始部署 服务 =========="
 
     # 检查依赖项
     check_dependencies || exit 1
@@ -264,16 +280,28 @@ main() {
     # 如果需要更新 Git
     if [ "$UPDATE_GIT" = true ]; then
         log "INFO" "正在更新 Git 仓库..."
+        local git_errors=0
+
         if [ ${#RESTART_SERVICES[@]} -eq 0 ]; then
             # 更新所有服务
             for service_code in "${!PROJECT_ROOTS[@]}"; do
-                git_update "${PROJECT_ROOTS[$service_code]}" "$service_code" || true
+                if ! git_update "${PROJECT_ROOTS[$service_code]}" "$service_code"; then
+                    ((git_errors++))
+                fi
             done
         else
             # 只更新指定服务
-            for service_port in "${RESTART_SERVICES[@]}"; do
-                git_update "${PROJECT_ROOTS[mes]}" "$service_port" || true
+            for service_code in "${RESTART_SERVICES[@]}"; do
+                if ! git_update "${PROJECT_ROOTS[$service_code]}" "$service_code"; then
+                    ((git_errors++))
+                fi
             done
+        fi
+
+        if [ $git_errors -gt 0 ]; then
+            log "WARN" "Git 更新完成，但有 ${git_errors} 个错误"
+        else
+            log "SUCCESS" "所有 Git 仓库更新完成"
         fi
     fi
 
@@ -286,13 +314,13 @@ main() {
     # 确定要重启的服务
     local SERVICES_TO_RESTART=()
     if [[ ${#RESTART_SERVICES[@]} -eq 0 ]]; then
-        log "INFO" "未指定服务端口，将重启所有服务"
+        log "INFO" "未指定服务，将重启所有服务"
         for service in "${SERVICES[@]}"; do
             SERVICES_TO_RESTART+=("$service")
         done
     else
-        for service_port in "${RESTART_SERVICES[@]}"; do
-            SERVICES_TO_RESTART+=("${SERVICES[$service_port]}")
+        for service_code in "${RESTART_SERVICES[@]}"; do
+            SERVICES_TO_RESTART+=("${SERVICES[$service_code]}")
         done
     fi
 
@@ -301,25 +329,32 @@ main() {
 
     # 最终状态验证
     log "INFO" "========== 最终服务状态 =========="
+    local all_running=true
     for service in "${SERVICES_TO_RESTART[@]}"; do
         local status_info=$(sudo supervisorctl status "$service")
         local status=$(echo "$status_info" | awk '{print $2}')
-        local port="${SERVICE_PORTS[$service]}"
 
         if [ "$status" == "RUNNING" ]; then
-            log "SUCCESS" "端口 ${port}: $status_info"
+            log "SUCCESS" "$service: $status"
         else
-            log "ERROR" "端口 ${port}: $status_info"
+            log "ERROR" "$service: $status_info"
+            all_running=false
         fi
     done
 
-    log "SUCCESS" "========== 部署完成 =========="
+    if $all_running; then
+        log "SUCCESS" "========== 所有服务部署成功 =========="
+    else
+        log "ERROR" "========== 部署完成，但部分服务异常 =========="
+        exit 1
+    fi
+
     log "INFO" "详细日志已保存至: $LOG_FILE"
 }
 
 # 异常处理
 trap 'log "ERROR" "脚本被用户中断"; exit 1' INT
-trap 'log "ERROR" "脚本执行失败: $?"' ERR
+trap 'log "ERROR" "脚本执行失败"; exit 1' ERR
 
 # 执行主函数
 main "$@"
