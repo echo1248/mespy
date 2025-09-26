@@ -181,7 +181,7 @@ class DyPalletService:
         pallets, cartons = await self._validate_bill_params(bill_params)
 
         if is_reverse:
-            await self._reverse_bill_operation(cartons, bill_params[0].pallet_pid)
+            await self._reverse_bill_operation(cartons, bill_params[0].pallet_pid, bill_type)
         else:
             await self._approve_bill_operation(pallets, cartons, bill_params, bill_type)
 
@@ -234,14 +234,15 @@ class DyPalletService:
                 data_dicts = [instance.__dict__ for instance in instances]
                 await db.execute(prod_dao.model.__table__.insert(), data_dicts)  # noqa 优化批量插入
 
-    async def _reverse_bill_operation(self, cartons: Sequence[DyCarton], pallet_pid: str) -> None:
+    async def _reverse_bill_operation(self, cartons: Sequence[DyCarton], pallet_pid: str, bill_type: str) -> None:
         """执行冲销单据操作"""
+        config = self.BILL_CONFIGS[bill_type]
         sn_keys = [carton.carton_boxsn for carton in cartons]
         prod_dao = self.PID_MAP[pallet_pid]
 
         async with async_db_session.begin() as db:
             await prod_dao.delete_model_by_column(
-                db, allow_multiple=True, test_snkey__in=sn_keys
+                db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey__eq=config.test_stkey
             )
 
     async def _validate_bill_params(self, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence]:
