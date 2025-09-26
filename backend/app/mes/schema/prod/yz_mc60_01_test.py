@@ -60,12 +60,15 @@ class YZMC6001TestSchemaBase(SchemaBase):
     test_pass_on3: datetime | None = Field(default=None, description='第三次测试通过时间')
     test_pass_testedby3: str | None = Field(default=None, description='第三次测试执行者')
     test_pass: bool = Field(default=False, description='总体测试通过状态')
-    test_rf_pow: Decimal | None = Field(default=None, description='RF功率')
-    test_rf_freqErr: Decimal | None = Field(default=None, description='RF频率误差')
-    test_rf_rssi: Decimal | None = Field(default=None, description='RF RSSI')
-    test_pow_cur: Decimal | None = Field(default=None, description='电源电流')
-    test_pow_volt: Decimal | None = Field(default=None, description='电源电压')
-    test_btkey_rssi: Decimal | None = Field(default=None, description='蓝牙键RSSI')
+
+    # 修复：为不能为null的字段添加合适的默认值
+    test_rf_pow: Decimal = Field(default=Decimal('0.0'), description='RF功率')
+    test_rf_freqErr: Decimal = Field(default=Decimal('0.0'), description='RF频率误差')
+    test_rf_rssi: Decimal = Field(default=Decimal('0.0'), description='RF RSSI')
+    test_pow_cur: Decimal = Field(default=Decimal('0.0'), description='电源电流')
+    test_pow_volt: Decimal = Field(default=Decimal('0.0'), description='电源电压')
+    test_btkey_rssi: Decimal = Field(default=Decimal('0.0'), description='蓝牙键RSSI')
+
     test_k3orderkey_s: str | None = Field(default=None, description='金蝶source源单单号，生产工单/销售订单')
     test_k3orderkey: str | None = Field(default=None, description='金蝶单据编号，生产入库单/销售出库单')
 
