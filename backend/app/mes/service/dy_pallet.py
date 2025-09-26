@@ -241,8 +241,12 @@ class DyPalletService:
         prod_dao = self.PID_MAP[pallet_pid]
 
         async with async_db_session.begin() as db:
+            if config.test_stkey == "ASSY_IS":
+                count = await prod_dao.count(db, test_snkey__in=sn_keys, test_stkey="ASSY_OS")
+                if count > 0:
+                    raise errors.RequestError(msg="有未完成出库的栈板")
             await prod_dao.delete_model_by_column(
-                db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey__eq=config.test_stkey
+                db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey=config.test_stkey
             )
 
     async def _validate_bill_params(self, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence]:
