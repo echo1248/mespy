@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class DictType(Base):
     """字典类型表"""
 
-    __tablename__ = 'sys_dict_type'
+    __tablename__ = 'mes_sys_dict_type'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(32), comment='字典类型名称')

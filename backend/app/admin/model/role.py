@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class Role(Base):
     """角色表"""
 
-    __tablename__ = 'sys_role'
+    __tablename__ = 'mes_sys_role'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(20), unique=True, comment='角色名称')

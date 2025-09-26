@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class GenBusiness(Base):
     """代码生成业务表"""
 
-    __tablename__ = 'gen_business'
+    __tablename__ = 'mes_gen_business'
 
     id: Mapped[id_key] = mapped_column(init=False)
     app_name: Mapped[str] = mapped_column(String(50), comment='应用名称（英文）')

@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class User(Base):
     """用户表"""
 
-    __tablename__ = 'sys_user'
+    __tablename__ = 'mes_sys_user'
 
     id: Mapped[id_key] = mapped_column(init=False)
     uuid: Mapped[str] = mapped_column(String(50), init=False, default_factory=uuid4_str, unique=True)
@@ -49,7 +49,7 @@ class User(Base):
 
     # 部门用户一对多
     dept_id: Mapped[int | None] = mapped_column(
-        ForeignKey('sys_dept.id', ondelete='SET NULL'), default=None, comment='部门关联ID'
+        ForeignKey('mes_sys_dept.id', ondelete='SET NULL'), default=None, comment='部门关联ID'
     )
     dept: Mapped[Dept | None] = relationship(init=False, back_populates='users')
 

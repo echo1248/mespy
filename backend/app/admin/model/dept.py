@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class Dept(Base):
     """部门表"""
 
-    __tablename__ = 'sys_dept'
+    __tablename__ = 'mes_sys_dept'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(50), comment='部门名称')
@@ -32,7 +32,7 @@ class Dept(Base):
 
     # 父级部门一对多
     parent_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey('sys_dept.id', ondelete='SET NULL'), default=None, index=True, comment='父部门ID'
+        BigInteger, ForeignKey('mes_sys_dept.id', ondelete='SET NULL'), default=None, index=True, comment='父部门ID'
     )
     parent: Mapped[Optional['Dept']] = relationship(init=False, back_populates='children', remote_side=[id])
     children: Mapped[Optional[list['Dept']]] = relationship(init=False, back_populates='parent')

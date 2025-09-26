@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class UserSocial(Base):
     """用户社交表（OAuth2）"""
 
-    __tablename__ = 'sys_user_social'
+    __tablename__ = 'mes_sys_user_social'
 
     id: Mapped[id_key] = mapped_column(init=False)
     sid: Mapped[str] = mapped_column(String(255), comment='第三方用户 ID')
@@ -24,6 +24,6 @@ class UserSocial(Base):
 
     # 用户社交信息一对多
     user_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey('sys_user.id', ondelete='CASCADE'), comment='用户关联ID'
+        BigInteger, ForeignKey('mes_sys_user.id', ondelete='CASCADE'), comment='用户关联ID'
     )
     user: Mapped[User | None] = relationship(init=False, backref='socials')

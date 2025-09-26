@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class DataScope(Base):
     """数据范围表"""
 
-    __tablename__ = 'sys_data_scope'
+    __tablename__ = 'mes_sys_data_scope'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(50), unique=True, comment='名称')

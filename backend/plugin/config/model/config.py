@@ -11,7 +11,7 @@ from backend.common.model import Base, id_key
 class Config(Base):
     """参数配置表"""
 
-    __tablename__ = 'sys_config'
+    __tablename__ = 'mes_sys_config'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(20), comment='名称')

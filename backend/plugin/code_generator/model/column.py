@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class GenColumn(DataClassBase):
     """代码生成模型列表"""
 
-    __tablename__ = 'gen_column'
+    __tablename__ = 'mes_gen_column'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(50), comment='列名称')
@@ -33,6 +33,6 @@ class GenColumn(DataClassBase):
 
     # 代码生成业务模型列一对多
     gen_business_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey('gen_business.id', ondelete='CASCADE'), default=0, comment='代码生成业务ID'
+        BigInteger, ForeignKey('mes_gen_business.id', ondelete='CASCADE'), default=0, comment='代码生成业务ID'
     )
     gen_business: Mapped[Union['GenBusiness', None]] = relationship(init=False, back_populates='gen_column')

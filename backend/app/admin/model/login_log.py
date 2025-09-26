@@ -14,7 +14,7 @@ from backend.utils.timezone import timezone
 class LoginLog(DataClassBase):
     """登录日志表"""
 
-    __tablename__ = 'sys_login_log'
+    __tablename__ = 'mes_sys_login_log'
 
     id: Mapped[id_key] = mapped_column(init=False)
     user_uuid: Mapped[str] = mapped_column(String(50), comment='用户UUID')

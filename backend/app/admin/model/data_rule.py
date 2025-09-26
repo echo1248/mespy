@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class DataRule(Base):
     """数据规则表"""
 
-    __tablename__ = 'sys_data_rule'
+    __tablename__ = 'mes_sys_data_rule'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(500), unique=True, comment='名称')

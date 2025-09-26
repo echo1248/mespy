@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class Menu(Base):
     """菜单表"""
 
-    __tablename__ = 'sys_menu'
+    __tablename__ = 'mes_sys_menu'
 
     id: Mapped[id_key] = mapped_column(init=False)
     title: Mapped[str] = mapped_column(String(50), comment='菜单标题')
@@ -42,7 +42,7 @@ class Menu(Base):
 
     # 父级菜单一对多
     parent_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey('sys_menu.id', ondelete='SET NULL'), default=None, index=True, comment='父菜单ID'
+        BigInteger, ForeignKey('mes_sys_menu.id', ondelete='SET NULL'), default=None, index=True, comment='父菜单ID'
     )
     parent: Mapped[Optional['Menu']] = relationship(init=False, back_populates='children', remote_side=[id])
     children: Mapped[Optional[list['Menu']]] = relationship(init=False, back_populates='parent')
