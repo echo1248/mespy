@@ -20,6 +20,8 @@ from backend.app.mes.crud.prod.crud_xm_x6a_test import xm_x6a_test_dao
 from backend.app.mes.crud.prod.crud_xm_x8c_test import xm_x8c_test_dao
 from backend.app.mes.crud.prod.crud_xm_x8f_test import xm_x8f_test_dao
 from backend.app.mes.crud.prod.crud_xm_xhb_test import xm_xhb_test_dao
+from backend.app.mes.crud.prod.crud_yz_mc601_test import yz_mc601_test_dao
+from backend.app.mes.crud.prod.crud_yz_mc60_01_test import yz_mc60_01_test_dao
 from backend.app.mes.model import DyPallet, DyCarton
 from backend.app.mes.schema.dy_pallet import CreateDyPalletParam, DeleteDyPalletParam, BillParam
 from backend.app.mes.schema.prod.dy_qbh4248cn_test import CreateDyQBH4248CNTestParam
@@ -89,6 +91,12 @@ class DyPalletService:
 
         # X8F
         "48350": xm_x8f_test_dao,
+
+        # MC60-01
+        "60314": yz_mc60_01_test_dao,
+
+        # MC601
+        "60317": yz_mc601_test_dao, "63605": yz_mc601_test_dao,
 
         # QBH
         "44481": dy_qbh4248cn_test_dao,
