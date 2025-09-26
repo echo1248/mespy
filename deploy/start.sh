@@ -4,7 +4,7 @@ set -euo pipefail
 # ======================
 # 配置区（与 supervisor 配置一致）
 # ======================
-CONFIG_NAME="llm_services.conf"
+CONFIG_NAME="mes_services.conf"
 SUPERVISOR_DIR="/etc/supervisor/conf.d"
 BASE_PATH="/opt/mes"
 
@@ -17,8 +17,8 @@ declare -A PROJECT_ROOTS=(
 )
 
 declare -A SERVICES=(
-    ["alpha"]="llm_services:mes_alpha_8000"
-    ["prod"]="llm_services:mes_prod_8100"
+    ["alpha"]="mes_services:mes_alpha_8000"
+    ["prod"]="mes_services:mes_prod_8100"
 )
 
 # 服务端口映射（用于显示）
