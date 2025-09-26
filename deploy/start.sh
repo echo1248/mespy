@@ -137,7 +137,7 @@ check_dependencies() {
 }
 
 deploy_config() {
-    local config_source="${PROJECT_ROOTS[zh]}/deploy/${CONFIG_NAME}"
+    local config_source="${PROJECT_ROOTS[alpha]}/deploy/${CONFIG_NAME}"
 
     if [ ! -f "$config_source" ]; then
         log "ERROR" "配置文件不存在: $config_source"
