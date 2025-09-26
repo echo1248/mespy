@@ -244,10 +244,10 @@ class DyPalletService:
         config = self.BILL_CONFIGS[bill_type]
         sn_keys = [carton.carton_boxsn for carton in cartons]
 
-        for pallet_pid in set([param.pallet_pid for param in bill_params]):
-            prod_dao = self.PID_MAP[pallet_pid]
+        async with async_db_session.begin() as db:
+            for pallet_pid in set([param.pallet_pid for param in bill_params]):
+                prod_dao = self.PID_MAP[pallet_pid]
 
-            async with async_db_session.begin() as db:
                 if config.test_stkey == "ASSY_IS":
                     count = await prod_dao.count(db, test_snkey__in=sn_keys, test_stkey="ASSY_OS")
                     if count > 0:
