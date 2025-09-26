@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     )
 
     # .env 当前环境
-    ENVIRONMENT: Literal['dev', 'prod']
+    ENVIRONMENT: Literal['dev', 'prod'] = 'dev'
 
     # FastAPI
     FASTAPI_API_V1_PATH: str = '/api/v1'
