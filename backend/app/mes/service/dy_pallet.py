@@ -244,7 +244,7 @@ class DyPalletService:
             if config.test_stkey == "ASSY_IS":
                 count = await prod_dao.count(db, test_snkey__in=sn_keys, test_stkey="ASSY_OS")
                 if count > 0:
-                    raise errors.RequestError(msg="有未完成出库的栈板")
+                    raise errors.RequestError(msg="有已完成出库的栈板，不允许入库反审核")
             await prod_dao.delete_model_by_column(
                 db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey=config.test_stkey
             )
