@@ -36,6 +36,8 @@ from backend.app.mes.schema.prod.xm_x6a_test import CreateXMX6ATestParam
 from backend.app.mes.schema.prod.xm_x8c_test import CreateXMX8CTestParam
 from backend.app.mes.schema.prod.xm_x8f_test import CreateXMX8FTestParam
 from backend.app.mes.schema.prod.xm_xhb_test import CreateXMXHBTestParam
+from backend.app.mes.schema.prod.yz_mc601_test import CreateYZMC601TestParam
+from backend.app.mes.schema.prod.yz_mc60_01_test import CreateYZMC6001TestParam
 from backend.common.exception import errors
 from backend.common.log import log
 from backend.database.db import async_db_session
@@ -117,6 +119,8 @@ class DyPalletService:
         xm_x6a_test_dao: CreateXMX6ATestParam,
         xm_x8c_test_dao: CreateXMX8CTestParam,
         xm_x8f_test_dao: CreateXMX8FTestParam,
+        yz_mc60_01_test_dao: CreateYZMC6001TestParam,
+        yz_mc601_test_dao: CreateYZMC601TestParam,
         dy_qbh4248cn_test_dao: CreateDyQBH4248CNTestParam,
         xm_xhb_test_dao: CreateXMXHBTestParam,
     }
