@@ -111,6 +111,23 @@ services:
     networks:
       - jiqid_net
 
+  minio:
+    restart: always
+    image: minio/minio
+    container_name: minio
+    environment:
+      - MINIO_ACCESS_KEY=root
+      - MINIO_SECRET_KEY=Qkxc123456
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    volumes:
+      - ${DATA_ROOT}/minio/data:/data
+      - ${DATA_ROOT}/minio/config:/root/.minio
+    command: server /data --console-address :9090 -address :9000
+    networks:
+      - jiqid_net
+
 networks:
   jiqid_net:
     driver: bridge
