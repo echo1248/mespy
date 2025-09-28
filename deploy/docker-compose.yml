@@ -9,9 +9,9 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=Qkxc123456
     volumes:
-      - /opt/mes/mysql/log:/var/log/mysql # 映射日志目录，宿主机:容器
-      - /opt/mes/mysql/data:/var/lib/mysql # 映射数据目录，宿主机:容器
-      - /opt/mes/mysql/conf.d:/etc/mysql/conf.d # 映射配置目录，宿主机:容器
+      - ${DATA_ROOT}/mysql/log:/var/log/mysql # 映射日志目录，宿主机:容器
+      - ${DATA_ROOT}/mysql/data:/var/lib/mysql # 映射数据目录，宿主机:容器
+      - ${DATA_ROOT}/mysql/conf.d:/etc/mysql/conf.d # 映射配置目录，宿主机:容器
       - /etc/localtime:/etc/localtime:ro # 让容器的时钟与宿主机时钟同步，避免时间的问题，ro是read only的意思，就是只读。
     networks:
       - jiqid_net
@@ -24,7 +24,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /opt/mes/redis/data:/data
+      - ${DATA_ROOT}/redis/data:/data
     command: [ "redis-server", "--requirepass", "Qkxc123456" ]
     networks:
       - jiqid_net
@@ -42,8 +42,8 @@ services:
       - TZ=Asia/Shanghai
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - /opt/mes/nginx/html:/usr/share/nginx/html
-      - /opt/mes/nginx/logs:/var/log/nginx
+      - ${DATA_ROOT}/nginx/html:/usr/share/nginx/html
+      - ${DATA_ROOT}/nginx/logs:/var/log/nginx
     networks:
       - jiqid_net
 
@@ -74,8 +74,8 @@ services:
       - "8883:8883"
       - "18083:18083"
     volumes:
-      - /opt/mes/emqx/data:/opt/emqx/data
-      - /opt/mes/emqx/log:/opt/emqx/log
+      - ${DATA_ROOT}/emqx/data:/opt/emqx/data
+      - ${DATA_ROOT}/emqx/log:/opt/emqx/log
     networks:
       - jiqid_net
 
@@ -106,8 +106,8 @@ services:
       - "8883:8883"
       - "18083:18083"
     volumes:
-      - /opt/mes/emqx/data:/opt/emqx/data
-      - /opt/mes/emqx/log:/opt/emqx/log
+      - ${DATA_ROOT}/emqx/data:/opt/emqx/data
+      - ${DATA_ROOT}/emqx/log:/opt/emqx/log
     networks:
       - jiqid_net
 
