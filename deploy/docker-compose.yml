@@ -71,6 +71,8 @@ services:
       - ${DATA_ROOT}/nginx/html:/usr/share/nginx/html
       - ${DATA_ROOT}/nginx/logs:/var/log/nginx
       - /etc/localtime:/etc/localtime:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - jiqid_net
 
