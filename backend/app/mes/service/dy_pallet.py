@@ -225,7 +225,7 @@ class DyPalletService:
                     **common_params,
                     "test_sn": carton.carton_boxsn,
                     "test_funccode": config.test_stkey,
-                    "test_result": 1,
+                    "test_result": 0,
                 }
             else:
                 params = {
