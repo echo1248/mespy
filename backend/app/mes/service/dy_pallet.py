@@ -206,22 +206,36 @@ class DyPalletService:
             if bill is None:
                 continue
 
-            create_objs.append({
-                "test_snkey": carton.carton_boxsn,
-                "test_stkey": config.test_stkey,
+            common_params = {
                 "test_sttitle": config.test_sttitle,
                 "test_times_putin": 1,
                 "test_pid": pallet.pallet_pid,
                 "test_skukey": pallet.pallet_key,
                 "test_skutitle": pallet.pallet_title,
-                "test_pass_1": 1,
                 "test_pass_on1": timezone.now(),
                 "test_pass_testedby1": "MES",
                 "test_info_1": config.test_info_1,
                 "test_createdon": timezone.now(),
                 "test_k3orderkey_s": bill.k3orderkey_s,
                 "test_k3orderkey": bill.k3orderkey,
-            })
+            }
+
+            if pallet.pallet_pid == "44481":  # 音箱
+                params = {
+                    **common_params,
+                    "test_sn": carton.carton_boxsn,
+                    "test_funccode": config.test_stkey,
+                    "test_result": 1,
+                }
+            else:
+                params = {
+                    **common_params,
+                    "test_snkey": carton.carton_boxsn,
+                    "test_stkey": config.test_stkey,
+                    "test_pass_1": 1,
+                }
+
+            create_objs.append(params)
 
         if not create_objs:
             raise errors.NotFoundError(msg="未找到对应的栈板和箱信息")
@@ -245,16 +259,35 @@ class DyPalletService:
         sn_keys = [carton.carton_boxsn for carton in cartons]
 
         async with async_db_session.begin() as db:
-            for pallet_pid in set([param.pallet_pid for param in bill_params]):
+            for pallet_pid in {param.pallet_pid for param in bill_params}:
                 prod_dao = self.PID_MAP[pallet_pid]
 
-                if config.test_stkey == "ASSY_IS":
-                    count = await prod_dao.count(db, test_snkey__in=sn_keys, test_stkey="ASSY_OS")
-                    if count > 0:
-                        raise errors.RequestError(msg="有已完成出库的栈板，不允许入库反审核")
-                await prod_dao.delete_model_by_column(
-                    db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey=config.test_stkey
-                )
+                if pallet_pid == "44481":  # 音箱特殊处理
+                    await self._handle_speaker_reverse(prod_dao, db, config, sn_keys)
+                else:
+                    await self._handle_products_reverse(prod_dao, db, config, sn_keys)
+
+    async def _handle_speaker_reverse(self, prod_dao, db, config, sn_keys):
+        """处理音箱冲销逻辑"""
+        if config.test_stkey == "ASSY_IS":
+            count = await prod_dao.count(db, test_sn__in=sn_keys, test_funccode="ASSY_OS")
+            if count > 0:
+                raise errors.RequestError(msg="有已完成出库的栈板，不允许入库反审核")
+
+        await prod_dao.delete_model_by_column(
+            db, allow_multiple=True, test_sn__in=sn_keys, test_funccode=config.test_stkey
+        )
+
+    async def _handle_products_reverse(self, prod_dao, db, config, sn_keys):
+        """处理其他产品冲销逻辑"""
+        if config.test_stkey == "ASSY_IS":
+            count = await prod_dao.count(db, test_snkey__in=sn_keys, test_stkey="ASSY_OS")
+            if count > 0:
+                raise errors.RequestError(msg="有已完成出库的栈板，不允许入库反审核")
+
+        await prod_dao.delete_model_by_column(
+            db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey=config.test_stkey
+        )
 
     async def _validate_bill_params(self, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence]:
         """验证单据参数并获取相关数据"""
