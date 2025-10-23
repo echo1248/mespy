@@ -80,7 +80,7 @@ class DyPalletService:
         "66524": xm_oh3r_test_dao, "66525": xm_oh3r_test_dao,
 
         # OH11
-        "66286": xm_oh11_test_dao,
+        "66286": xm_oh11_test_dao, "73648": xm_oh11_test_dao,
 
         # X4B
         "55119": xm_x4b_test_dao, "69675": xm_x4b_test_dao,
