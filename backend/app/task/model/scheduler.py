@@ -22,7 +22,7 @@ from backend.utils.timezone import timezone
 class TaskScheduler(Base):
     """任务调度表"""
 
-    __tablename__ = 'task_scheduler'
+    __tablename__ = 'mes_task_scheduler'
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(String(50), unique=True, comment='任务名称')
