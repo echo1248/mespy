@@ -140,6 +140,19 @@ services:
 #    networks:
 #      - jiqid_net
 
+  rabbitmq:
+    restart: always
+    image: rabbitmq:3.9.7-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: Qkxc123456
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ${DATA_ROOT}/rabbitmq/data:/var/lib/rabbitmq
+
   minio:
     restart: always
     image: minio/minio
