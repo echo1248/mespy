@@ -26,4 +26,8 @@ LOCAL_BEAT_SCHEDULE = {
         'task': 'backend.app.task.tasks.db_log.tasks.delete_db_login_log',
         'schedule': TzAwareCrontab('0', '0', day_of_month='15'),
     },
+    '发送邮件': {
+        'task': 'task_email_send',
+        'schedule': schedule(1500),
+    },
 }

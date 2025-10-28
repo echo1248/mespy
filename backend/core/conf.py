@@ -210,7 +210,7 @@ class Settings(BaseSettings):
     CELERY_RABBITMQ_PASSWORD: str
 
     # 基础配置
-    CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'redis'
+    CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'rabbitmq'
     CELERY_REDIS_PREFIX: str = 'mes:celery'
     CELERY_TASK_MAX_RETRIES: int = 5
 
@@ -254,6 +254,15 @@ class Settings(BaseSettings):
         {"app_key": "MES_K3", "app_secret": "3a6e9c2b8d4f7a", "name": "金蝶"},
         {"app_key": "MES_BEITONG", "app_secret": "7b2d9a4e6c8f3b", "name": "工厂上位机"},
     ]
+
+    # email
+    EMAIL: dict[
+        str, str
+    ] = {
+        "from_address": "guhua@jiqid.com",
+        "password": "Gh819070918",
+        "subject": "Mes系统邮件",
+    }
 
     @model_validator(mode='before')
     @classmethod

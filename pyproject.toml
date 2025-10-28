@@ -49,6 +49,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.44",
     "sqlparse>=0.5.3",
     "user-agents>=2.2.0",
+    "aiosmtplib==4.0.1",
 ]
 
 [dependency-groups]

@@ -1,8 +1,12 @@
 from time import sleep
 
+from sqlalchemy import text
 from anyio import sleep as asleep
 
 from backend.app.task.celery import celery_app
+from backend.app.task.utils.email_util import email_service
+from backend.common.log import log
+from backend.database.db import async_db_session
 
 
 @celery_app.task(name='task_demo')
@@ -24,3 +28,35 @@ async def task_demo_params(hello: str, world: str | None = None) -> str:
     """参数示例任务，模拟传参操作"""
     await asleep(1)
     return hello + world
+
+
+@celery_app.task(name="task_email_send")
+async def task_email_send():
+    """执行存储过程并发送邮件通知"""
+    await _task_email_send_async()
+
+
+async def _task_email_send_async():
+    log.info("📨 [task_email_send] 开始执行存储过程并准备发送邮件")
+
+    try:
+        async with async_db_session.begin() as session:
+            await session.execute(text("SET @ret = '';"))
+            await session.execute(text("CALL procISC_DeleteHistoryAndCheckHB(@ret);"))
+            result = await session.execute(text("SELECT @ret AS ret;"))
+            row = result.fetchone()
+            await session.commit()
+
+        ret_msg = row.ret if row and row.ret else "无返回结果"
+
+        # 发送邮件
+        if row and row.ret:
+            await email_service.send_msg(
+                receivers=["wangzhong@jiqid.com", "guhua@jiqid.com"],
+                body=f"MES Monitor ISC精细化管理接口上报预警 - {ret_msg}"
+            )
+
+        log.info(f"✅ [task_email_send] 执行成功，结果：{ret_msg}")
+
+    except Exception as e:
+        log.error(f"❌ [task_email_send] 任务执行失败: {e}", exc_info=True)
