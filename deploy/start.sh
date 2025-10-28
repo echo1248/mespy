@@ -16,14 +16,14 @@ declare -A PROJECT_ROOTS=(
     ["prod"]="${BASE_PATH}/prod/mespy"    # 生产环境
 )
 
-# 服务映射（服务代码 -> supervisor 服务名）
+# 服务映射（服务代码 -> supervisor 服务名，包含组名）
 declare -A SERVICES=(
-    ["alpha_web"]="mes_alpha_8000"
-    ["alpha_worker"]="mes_alpha_celery_worker"
-    ["alpha_beat"]="mes_alpha_celery_beat"
-    ["prod_web"]="mes_prod_8100"
-    ["prod_worker"]="mes_prod_celery_worker"
-    ["prod_beat"]="mes_prod_celery_beat"
+    ["alpha_web"]="mes_services:mes_alpha_8000"
+    ["alpha_worker"]="mes_services:mes_alpha_celery_worker"
+    ["alpha_beat"]="mes_services:mes_alpha_celery_beat"
+    ["prod_web"]="mes_services:mes_prod_8100"
+    ["prod_worker"]="mes_services:mes_prod_celery_worker"
+    ["prod_beat"]="mes_services:mes_prod_celery_beat"
 )
 
 # 服务显示名称
@@ -273,7 +273,7 @@ list_services() {
     echo ""
     echo -e "${CYAN}单个服务:${NC}"
     for service_code in "${!SERVICES[@]}"; do
-        echo -e "  ${service_code} -> ${SERVICE_DISPLAY_NAMES[$service_code]}"
+        echo -e "  ${service_code} -> ${SERVICE_DISPLAY_NAMES[$service_code]} (supervisor: ${SERVICES[$service_code]})"
     done
     echo ""
     echo -e "${CYAN}服务组:${NC}"
