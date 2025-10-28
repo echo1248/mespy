@@ -15,7 +15,7 @@ from backend.common.model import MappedBase
 class Task(MappedBase):
     """Task result/status."""
 
-    __tablename__ = 'mes_task_result'
+    __tablename__ = 'task_result'
     __table_args__ = {'comment': '任务结果表'}
 
     id = sa.Column(sa.Integer, sa.Sequence('task_id_sequence'), primary_key=True, autoincrement=True)
