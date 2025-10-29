@@ -211,7 +211,7 @@ class Settings(BaseSettings):
     CELERY_RABBITMQ_VHOST: str = ""
 
     # 基础配置
-    CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'rabbitmq'
+    CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'redis'
     CELERY_REDIS_PREFIX: str = 'mes:celery'
     CELERY_TASK_MAX_RETRIES: int = 5
 

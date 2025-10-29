@@ -4,7 +4,6 @@ import celery
 import celery_aio_pool
 
 from backend.app.task.tasks.beat import LOCAL_BEAT_SCHEDULE
-from backend.common.log import setup_logging, set_custom_logfile
 from backend.core.conf import settings
 from backend.core.path_conf import BASE_PATH
 
@@ -61,12 +60,6 @@ def init_celery() -> celery.Celery:
 
     # 禁用 Celery 接管根日志记录器
     app.conf.worker_hijack_root_logger = False
-
-    # 在应用启动时设置日志
-    @app.on_after_configure.connect
-    def setup_logging_on_start(sender, **kwargs):
-        setup_logging()
-        set_custom_logfile()
 
     return app
 
