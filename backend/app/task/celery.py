@@ -7,6 +7,8 @@ from backend.app.task.tasks.beat import LOCAL_BEAT_SCHEDULE
 from backend.core.conf import settings
 from backend.core.path_conf import BASE_PATH
 
+__all__ = ['celery_app']
+
 
 def find_task_packages() -> list[str]:
     packages = []
@@ -41,7 +43,7 @@ def init_celery() -> celery.Celery:
         # result_expires=0,
         # beat_sync_every=1,
         beat_schedule=LOCAL_BEAT_SCHEDULE,
-        # beat_scheduler='backend.app.task.utils.schedulers:DatabaseScheduler',
+        beat_scheduler='backend.app.task.utils.schedulers:DatabaseScheduler',
         task_cls='backend.app.task.tasks.base:TaskBase',
         task_track_started=True,
         enable_utc=False,
