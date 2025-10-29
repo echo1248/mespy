@@ -208,6 +208,7 @@ class Settings(BaseSettings):
     CELERY_RABBITMQ_PORT: int
     CELERY_RABBITMQ_USERNAME: str
     CELERY_RABBITMQ_PASSWORD: str
+    CELERY_RABBITMQ_VHOST: str = ""
 
     # 基础配置
     CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'rabbitmq'

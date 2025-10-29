@@ -1,4 +1,4 @@
-from celery.schedules import timedelta
+from celery.schedules import schedule
 
 from backend.app.task.utils.tzcrontab import TzAwareCrontab
 
@@ -6,7 +6,7 @@ from backend.app.task.utils.tzcrontab import TzAwareCrontab
 LOCAL_BEAT_SCHEDULE = {
     '测试同步任务': {
         'task': 'task_demo',
-        'schedule': timedelta(seconds=30),
+        'schedule': schedule(30),
     },
     '测试异步任务': {
         'task': 'task_demo_async',
@@ -28,6 +28,6 @@ LOCAL_BEAT_SCHEDULE = {
     },
     '发送邮件': {
         'task': 'task_email_send',
-        'schedule': timedelta(seconds=1500),
+        'schedule': schedule(1500),
     },
 }
