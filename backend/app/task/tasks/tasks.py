@@ -1,7 +1,5 @@
-from time import sleep
 
 from sqlalchemy import text
-from anyio import sleep as asleep
 from backend.common.log import log
 
 from backend.app.task.celery import celery_app
@@ -13,7 +11,6 @@ from backend.database.db import async_db_session
 def task_demo() -> str:
     """示例任务，模拟耗时操作"""
     log.info("开始同步示例任务")
-    sleep(30)
     return 'test async'
 
 
@@ -21,7 +18,6 @@ def task_demo() -> str:
 async def task_demo_async() -> str:
     """异步示例任务，模拟耗时操作"""
     log.info("开始异步示例任务")
-    await asleep(30)
     return 'test async'
 
 
@@ -29,7 +25,6 @@ async def task_demo_async() -> str:
 async def task_demo_params(hello: str, world: str | None = None) -> str:
     """参数示例任务，模拟传参操作"""
     log.info("开始参数示例任务")
-    await asleep(1)
     return hello + world
 
 
