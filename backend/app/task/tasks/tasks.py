@@ -1,3 +1,4 @@
+import asyncio
 
 from sqlalchemy import text
 from backend.common.log import log
@@ -31,7 +32,7 @@ async def task_demo_params(hello: str, world: str | None = None) -> str:
 @celery_app.task(name="task_email_send")
 async def task_email_send() -> str:
     """执行存储过程并发送邮件通知"""
-    return await _task_email_send_async()
+    return await asyncio.wait_for(_task_email_send_async(), timeout=60)
 
 
 async def _task_email_send_async():

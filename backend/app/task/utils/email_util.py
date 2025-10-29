@@ -54,12 +54,13 @@ class EmailService(object):
 
 email_service = EmailService()
 
-# async def main():
-#     await email_service.send(
-#         receivers=["guhua@jiqid.com"],
-#         body="MES Monitor ISC精细化管理接口上报预警"
-#     )
-#
-#
-# if __name__ == '__main__':
-#     asyncio.run(main())
+
+async def main():
+    await email_service.send(
+        recipients=["guhua@jiqid.com"],
+        body="MES Monitor ISC精细化管理接口上报预警"
+    )
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
