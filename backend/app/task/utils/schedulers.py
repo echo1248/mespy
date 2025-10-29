@@ -26,6 +26,7 @@ from backend.database.redis import redis_client
 from backend.utils._await import run_await
 from backend.utils.serializers import select_as_dict
 from backend.utils.timezone import timezone
+from backend.common.log import log
 
 if TYPE_CHECKING:
     from redis.asyncio.lock import Lock
@@ -36,7 +37,8 @@ DEFAULT_MAX_INTERVAL = 5  # seconds
 # 计划锁时长，避免重复创建
 DEFAULT_MAX_LOCK_TIMEOUT = DEFAULT_MAX_INTERVAL * 5  # seconds
 
-logger = get_logger('mes.schedulers')
+# logger = get_logger('mes.schedulers')
+logger = log
 
 
 class ModelEntry(ScheduleEntry):
