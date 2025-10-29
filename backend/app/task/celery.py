@@ -7,8 +7,6 @@ from backend.app.task.tasks.beat import LOCAL_BEAT_SCHEDULE
 from backend.core.conf import settings
 from backend.core.path_conf import BASE_PATH
 
-__all__ = ['celery_app']
-
 
 def find_task_packages() -> list[str]:
     packages = []
@@ -57,9 +55,6 @@ def init_celery() -> celery.Celery:
     # 自动发现任务
     packages = find_task_packages()
     app.autodiscover_tasks(packages)
-
-    # 禁用 Celery 接管根日志记录器
-    app.conf.worker_hijack_root_logger = False
 
     return app
 
