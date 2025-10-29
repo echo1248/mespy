@@ -238,12 +238,12 @@ class Settings(BaseSettings):
     # [ Plugin ] email
     ##################################################
     # .env
-    EMAIL_USERNAME: str
-    EMAIL_PASSWORD: str
+    EMAIL_USERNAME: str = "guhua@jiqid.com"
+    EMAIL_PASSWORD: str = "Gh819070918"
 
     # 基础配置
-    EMAIL_HOST: str = 'smtp.qq.com'
-    EMAIL_PORT: int = 465
+    EMAIL_HOST: str = 'smtp.exmail.qq.com'
+    EMAIL_PORT: int = 25
     EMAIL_SSL: bool = True
     EMAIL_CAPTCHA_REDIS_PREFIX: str = 'mes:email:captcha'
     EMAIL_CAPTCHA_EXPIRE_SECONDS: int = 60 * 3  # 3 分钟
@@ -256,14 +256,6 @@ class Settings(BaseSettings):
         {"app_key": "MES_BEITONG", "app_secret": "7b2d9a4e6c8f3b", "name": "工厂上位机"},
     ]
 
-    # email
-    EMAIL: dict[
-        str, str
-    ] = {
-        "from_address": "guhua@jiqid.com",
-        "password": "Gh819070918",
-        "subject": "Mes系统邮件",
-    }
 
     @model_validator(mode='before')
     @classmethod
