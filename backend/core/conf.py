@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     )
 
     # .env 当前环境
-    ENVIRONMENT: Literal['dev', 'prod'] = 'dev'
+    ENVIRONMENT: Literal['dev', 'pro'] = 'dev'
 
     # FastAPI
     FASTAPI_API_V1_PATH: str = '/api/v1'
@@ -269,7 +269,7 @@ class Settings(BaseSettings):
     @classmethod
     def check_env(cls, values: Any) -> Any:
         """检查环境变量"""
-        if values.get('ENVIRONMENT') == 'prod':
+        if values.get('ENVIRONMENT') == 'pro':
             # FastAPI
             values['FASTAPI_OPENAPI_URL'] = None
             values['FASTAPI_STATIC_FILES'] = False
