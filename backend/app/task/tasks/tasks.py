@@ -51,7 +51,7 @@ async def _task_email_send_async():
         # 发送邮件
         if row and row.ret:
             await email_service.send(
-                receivers=["wangzhong@jiqid.com", "guhua@jiqid.com"],
+                recipients=["wangzhong@jiqid.com", "guhua@jiqid.com"],
                 body=f"MES Monitor ISC精细化管理接口上报预警 - {ret_msg}"
             )
 
