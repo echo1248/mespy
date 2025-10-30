@@ -31,7 +31,7 @@ sys_role_data_scope = sa.Table(
     MappedBase.metadata,
     sa.Column('id', sa.BigInteger, primary_key=True, unique=True, index=True, autoincrement=True, comment='主键 ID'),
     sa.Column(
-        'role_id', sa.BigInteger, sa.ForeignKey('sys_role.id', ondelete='CASCADE'), primary_key=True, comment='角色 ID'
+        'role_id', sa.BigInteger, sa.ForeignKey('mes_sys_role.id', ondelete='CASCADE'), primary_key=True, comment='角色 ID'
     ),
     sa.Column(
         'data_scope_id',
