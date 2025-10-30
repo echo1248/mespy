@@ -47,9 +47,10 @@ async def task_email_send() -> str:
         ret_msg = row.ret if row and row.ret else "无返回结果"
         if row and row.ret:
             await send_email(
-                recipients=["wangzhong@jiqid.com", "guhua@jiqid.com"],
+                recipients=["wangzhong@jiqid.com", ],
                 body=f"MES Monitor ISC精细化管理接口上报预警 - {ret_msg}",
                 subject="MES 系统邮件",
+                cc_recipients=["guhua@jiqid.com", ],
             )
 
         log.info(f"✅ [task_email_send] 执行成功，结果：{ret_msg}")
@@ -59,22 +60,37 @@ async def task_email_send() -> str:
         return "任务执行失败"
 
 
-async def send_email(recipients: list[str], body: str, subject: str):
+async def send_email(
+        recipients: list[str],
+        body: str,
+        subject: str,
+        cc_recipients: list[str] | None = None
+):
     """发送邮件"""
+    if not recipients:
+        log.error("发送邮件失败: 收件人列表为空")
+        return
+
     html_body = f"""
-        <html><body>
-            <p>你好：</p>
-            <div style="margin-left: 20px; padding: 10px;">{body}</div>
-        </body></html>
-        """
-    content = {"data": html_body, "type": "html"}
+<html>
+<body>
+    <p>你好：</p>
+    <div>{body}</div>
+    <br>
+    <p><i>系统自动邮件，请勿回复</i></p>
+</body>
+</html>
+"""
     try:
-        msg = MIMEMultipart()
+        msg = MIMEMultipart('mixed')
         msg['From'] = settings.EMAIL_USERNAME
-        msg['To'] = ",".join(recipients)
+        msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
 
-        msg.attach(MIMEText(content["data"], content["type"], 'utf-8'))
+        if cc_recipients:
+            msg['Cc'] = ", ".join(cc_recipients)
+
+        msg.attach(MIMEText(html_body, "html", 'utf-8'))
 
         await aiosmtplib.send(
             msg, hostname=settings.EMAIL_HOST, port=settings.EMAIL_PORT,
