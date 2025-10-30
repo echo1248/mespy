@@ -1,10 +1,13 @@
 import asyncio
+import aiosmtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from sqlalchemy import text
+from backend.core.conf import settings
 from backend.common.log import log
 
 from backend.app.task.celery import celery_app
-from backend.app.task.utils.email_util import email_service
 from backend.database.db import async_db_session
 
 
@@ -32,12 +35,7 @@ async def task_demo_params(hello: str, world: str | None = None) -> str:
 @celery_app.task(name="task_email_send")
 async def task_email_send() -> str:
     """执行存储过程并发送邮件通知"""
-    return await asyncio.wait_for(_task_email_send_async(), timeout=60)
-
-
-async def _task_email_send_async():
     log.info("📨 [task_email_send] 开始执行存储过程并准备发送邮件")
-
     try:
         async with async_db_session.begin() as session:
             await session.execute(text("SET @ret = '';"))
@@ -47,17 +45,40 @@ async def _task_email_send_async():
             await session.commit()
 
         ret_msg = row.ret if row and row.ret else "无返回结果"
-
-        # 发送邮件
         if row and row.ret:
-            await email_service.send(
+            await send_email(
                 recipients=["wangzhong@jiqid.com", "guhua@jiqid.com"],
-                body=f"MES Monitor ISC精细化管理接口上报预警 - {ret_msg}"
+                body=f"MES Monitor ISC精细化管理接口上报预警 - {ret_msg}",
+                subject="MES 系统邮件",
             )
 
         log.info(f"✅ [task_email_send] 执行成功，结果：{ret_msg}")
-
         return ret_msg
-
     except Exception as e:
         log.error(f"❌ [task_email_send] 任务执行失败: {e}", exc_info=True)
+        return "任务执行失败"
+
+
+async def send_email(recipients: list[str], body: str, subject: str):
+    """发送邮件"""
+    html_body = f"""
+        <html><body>
+            <p>你好：</p>
+            <div style="margin-left: 20px; padding: 10px;">{body}</div>
+        </body></html>
+        """
+    content = {"data": html_body, "type": "html"}
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = settings.EMAIL_USERNAME
+        msg['To'] = ",".join(recipients)
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(content["data"], content["type"], 'utf-8'))
+
+        await aiosmtplib.send(
+            msg, hostname=settings.EMAIL_HOST, port=settings.EMAIL_PORT,
+            username=settings.EMAIL_USERNAME, password=settings.EMAIL_PASSWORD,
+        )
+    except Exception as e:
+        log.error(f"邮件发送失败: {str(e)}, 收件人={recipients}, 主题={subject}")
