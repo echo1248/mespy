@@ -29,7 +29,7 @@ def init_celery() -> celery.Celery:
 
     # https://docs.celeryq.dev/en/stable/userguide/configuration.html
     app = celery.Celery(
-        f'{settings.ENVIRONMENT}_mes_celery',
+        f'mes_celery',
         broker_url=f'redis://:{settings.REDIS_PASSWORD}@{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.CELERY_BROKER_REDIS_DATABASE}'
         if settings.CELERY_BROKER == 'redis'
         else f'amqp://{settings.CELERY_RABBITMQ_USERNAME}:{settings.CELERY_RABBITMQ_PASSWORD}@{settings.CELERY_RABBITMQ_HOST}:{settings.CELERY_RABBITMQ_PORT}/{settings.CELERY_RABBITMQ_VHOST}',
@@ -41,7 +41,7 @@ def init_celery() -> celery.Celery:
         # result_expires=0,
         # beat_sync_every=1,
         beat_schedule=LOCAL_BEAT_SCHEDULE,
-        beat_scheduler='backend.app.task.utils.schedulers:DatabaseScheduler',
+        # beat_scheduler='backend.app.task.utils.schedulers:DatabaseScheduler',
         task_cls='backend.app.task.tasks.base:TaskBase',
         task_track_started=True,
         enable_utc=False,
