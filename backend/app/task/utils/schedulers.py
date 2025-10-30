@@ -279,7 +279,7 @@ class DatabaseScheduler(Scheduler):
     _heap_invalidated = False
 
     lock: Lock | None = None
-    lock_key = f'{settings.ENVIRONMENT}_{settings.CELERY_REDIS_PREFIX}:beat_lock'
+    lock_key = f'{settings.CELERY_REDIS_PREFIX}:beat_lock'
 
     def __init__(self, *args, **kwargs) -> None:
         self.app = kwargs['app']
