@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import Select
+from sqlalchemy import Select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
@@ -46,7 +46,7 @@ class CRUDDictData(CRUDPlus[DictData]):
         """
         return await self.select_models(db, load_strategies={'type': 'noload'})
 
-    async def get_list(
+    async def get_select(
         self,
         type_code: str | None,
         label: str | None,
@@ -55,7 +55,7 @@ class CRUDDictData(CRUDPlus[DictData]):
         type_id: int | None,
     ) -> Select:
         """
-        获取字典数据列表
+        获取字典数据列表查询表达式
 
         :param type_code: 字典类型编码
         :param label: 字典数据标签
@@ -79,15 +79,16 @@ class CRUDDictData(CRUDPlus[DictData]):
 
         return await self.select_order('id', 'desc', load_strategies={'type': 'noload'}, **filters)
 
-    async def get_by_label(self, db: AsyncSession, label: str) -> DictData | None:
+    async def get_by_label_and_type_code(self, db: AsyncSession, label: str, type_code: str) -> DictData | None:
         """
         通过标签获取字典数据
 
         :param db: 数据库会话
         :param label: 字典标签
+        :param type_code: 字典类型编码
         :return:
         """
-        return await self.select_model_by_column(db, label=label)
+        return await self.select_model_by_column(db, and_(self.model.label == label, self.model.type_code == type_code))
 
     async def create(self, db: AsyncSession, obj: CreateDictDataParam, type_code: str) -> None:
         """

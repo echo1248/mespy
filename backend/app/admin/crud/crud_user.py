@@ -108,6 +108,7 @@ class CRUDUser(CRUDPlus[User]):
         """
         role_ids = obj.roles
         del obj.roles
+
         count = await self.update_model(db, input_user.id, obj)
 
         stmt = select(Role).where(Role.id.in_(role_ids))
@@ -181,9 +182,9 @@ class CRUDUser(CRUDPlus[User]):
         new_pwd = get_hash_password(password, salt)
         return await self.update_model(db, pk, {'password': new_pwd, 'salt': salt})
 
-    async def get_list(self, dept: int | None, username: str | None, phone: str | None, status: int | None) -> Select:
+    async def get_select(self, dept: int | None, username: str | None, phone: str | None, status: int | None) -> Select:
         """
-        获取用户列表
+        获取用户列表查询表达式
 
         :param dept: 部门 ID
         :param username: 用户名

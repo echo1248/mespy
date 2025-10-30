@@ -8,6 +8,7 @@ from starlette.responses import RedirectResponse
 from backend.common.enums import UserSocialType
 from backend.common.response.response_schema import ResponseSchemaModel, response_base
 from backend.core.conf import settings
+from backend.database.db import CurrentSessionTransaction
 from backend.plugin.oauth2.service.oauth2_service import oauth2_service
 
 router = APIRouter()
@@ -17,7 +18,9 @@ linux_do_client = LinuxDoOAuth20(settings.OAUTH2_LINUX_DO_CLIENT_ID, settings.OA
 
 @router.get('', summary='获取 LinuxDo 授权链接')
 async def get_linux_do_oauth2_url(request: Request) -> ResponseSchemaModel[str]:
-    auth_url = await linux_do_client.get_authorization_url(redirect_uri=f'{request.url}/callback')
+    auth_url = await linux_do_client.get_authorization_url(
+        redirect_uri=f'{settings.OAUTH2_BACKEND_BASE_URL}{request.url.path}/callback'
+    )
     return response_base.success(data=auth_url)
 
 
@@ -28,7 +31,7 @@ async def get_linux_do_oauth2_url(request: Request) -> ResponseSchemaModel[str]:
     dependencies=[Depends(RateLimiter(times=5, minutes=1))],
 )
 async def linux_do_oauth2_callback(  # noqa: ANN201
-    request: Request,
+    db: CurrentSessionTransaction,
     response: Response,
     background_tasks: BackgroundTasks,
     oauth2: Annotated[
@@ -40,7 +43,7 @@ async def linux_do_oauth2_callback(  # noqa: ANN201
     access_token = token['access_token']
     user = await linux_do_client.get_userinfo(access_token)
     data = await oauth2_service.create_with_login(
-        request=request,
+        db=db,
         response=response,
         background_tasks=background_tasks,
         user=user,
