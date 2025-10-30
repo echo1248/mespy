@@ -27,9 +27,6 @@ def init_celery() -> celery.Celery:
     celery.app.trace.build_tracer = celery_aio_pool.build_async_tracer
     celery.app.trace.reset_worker_optimizations()
 
-    beat_schedule_filename = BASE_PATH / f"celerybeat-schedule-{settings.ENVIRONMENT}"
-    os.makedirs(BASE_PATH, exist_ok=True)
-
     # https://docs.celeryq.dev/en/stable/userguide/configuration.html
     app = celery.Celery(
         f'mes_celery',
@@ -44,8 +41,7 @@ def init_celery() -> celery.Celery:
         # result_expires=0,
         # beat_sync_every=1,
         beat_schedule=LOCAL_BEAT_SCHEDULE,
-        # beat_scheduler='backend.app.task.utils.schedulers:DatabaseScheduler',
-        beat_schedule_filename=str(beat_schedule_filename),
+        beat_scheduler='backend.app.task.utils.schedulers:DatabaseScheduler',
         task_cls='backend.app.task.tasks.base:TaskBase',
         task_track_started=True,
         enable_utc=False,

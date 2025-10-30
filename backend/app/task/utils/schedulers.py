@@ -50,9 +50,9 @@ class ModelEntry(ScheduleEntry):
         )
         try:
             if (
-                model.type == TaskSchedulerType.INTERVAL
-                and model.interval_every is not None
-                and model.interval_period is not None
+                    model.type == TaskSchedulerType.INTERVAL
+                    and model.interval_every is not None
+                    and model.interval_period is not None
             ):
                 self.schedule = schedules.schedule(timedelta(**{model.interval_period: model.interval_every}))
             elif model.type == TaskSchedulerType.CRONTAB and model.crontab is not None:
@@ -215,14 +215,14 @@ class ModelEntry(ScheduleEntry):
 
     @classmethod
     async def _unpack_fields(
-        cls,
-        name: str,
-        task: str,
-        schedule: schedules.schedule | TzAwareCrontab,
-        args: tuple | None = None,
-        kwargs: dict | None = None,
-        options: dict | None = None,
-        **entry,
+            cls,
+            name: str,
+            task: str,
+            schedule: schedules.schedule | TzAwareCrontab,
+            args: tuple | None = None,
+            kwargs: dict | None = None,
+            options: dict | None = None,
+            **entry,
     ) -> dict:
         model_schedule = await cls.to_model_schedule(name, task, schedule)
         model_dict = select_as_dict(model_schedule)
@@ -241,15 +241,15 @@ class ModelEntry(ScheduleEntry):
 
     @classmethod
     def _unpack_options(
-        cls,
-        queue: str | None = None,
-        exchange: str | None = None,
-        routing_key: str | None = None,
-        start_time: datetime | None = None,
-        expires: datetime | None = None,
-        expire_seconds: int | None = None,
-        *,
-        one_off: bool = False,
+            cls,
+            queue: str | None = None,
+            exchange: str | None = None,
+            routing_key: str | None = None,
+            start_time: datetime | None = None,
+            expires: datetime | None = None,
+            expire_seconds: int | None = None,
+            *,
+            one_off: bool = False,
     ) -> dict:
         data = {
             'queue': queue,
@@ -279,7 +279,7 @@ class DatabaseScheduler(Scheduler):
     _heap_invalidated = False
 
     lock: Lock | None = None
-    lock_key = f'{settings.CELERY_REDIS_PREFIX}:beat_lock'
+    lock_key = f'{settings.ENVIRONMENT}_{settings.CELERY_REDIS_PREFIX}:beat_lock'
 
     def __init__(self, *args, **kwargs) -> None:
         self.app = kwargs['app']
