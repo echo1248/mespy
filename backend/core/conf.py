@@ -189,6 +189,7 @@ class Settings(BaseSettings):
     # Plugin 配置
     PLUGIN_PIP_CHINA: bool = True
     PLUGIN_PIP_INDEX_URL: str = 'https://mirrors.aliyun.com/pypi/simple/'
+    PLUGIN_PIP_MAX_RETRY: int = 3
     PLUGIN_REDIS_PREFIX: str = 'mes:plugin'
 
     # I18n 配置
@@ -206,10 +207,10 @@ class Settings(BaseSettings):
     CELERY_RABBITMQ_PORT: int
     CELERY_RABBITMQ_USERNAME: str
     CELERY_RABBITMQ_PASSWORD: str
-    CELERY_RABBITMQ_VHOST: str = ""
 
     # 基础配置
     CELERY_BROKER: Literal['rabbitmq', 'redis'] = 'redis'
+    CELERY_RABBITMQ_VHOST: str = ''
     CELERY_REDIS_PREFIX: str = 'mes:celery'
     CELERY_TASK_MAX_RETRIES: int = 5
 
