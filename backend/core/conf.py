@@ -240,8 +240,8 @@ class Settings(BaseSettings):
     # [ Plugin ] email
     ##################################################
     # .env
-    EMAIL_USERNAME: str = "guhua@jiqid.com"
-    EMAIL_PASSWORD: str = "Gh819070918"
+    EMAIL_USERNAME: str = "server@jiqid.com"
+    EMAIL_PASSWORD: str = "Roboland@2022"
 
     # 基础配置
     EMAIL_HOST: str = 'smtp.exmail.qq.com'
