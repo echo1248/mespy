@@ -1,15 +1,17 @@
 import asyncio
 import subprocess
+import sys
 
 from dataclasses import dataclass
 from typing import Annotated, Literal
 
+import anyio
 import cappa
 import granian
 
 from cappa.output import error_format
 from rich.panel import Panel
-from rich.prompt import IntPrompt
+from rich.prompt import IntPrompt, Prompt
 from rich.table import Table
 from rich.text import Text
 from sqlalchemy import text
@@ -19,14 +21,13 @@ from backend import __version__
 from backend.common.enums import DataBaseType, PrimaryKeyType
 from backend.common.exception.errors import BaseExceptionError
 from backend.core.conf import settings
-from backend.database.db import async_db_session
-from backend.plugin.code_generator.schema.code import ImportParam
-from backend.plugin.code_generator.service.business_service import gen_business_service
-from backend.plugin.code_generator.service.code_service import gen_service
-from backend.plugin.tools import get_plugin_sql
-from backend.utils._await import run_await
+from backend.core.path_conf import BASE_PATH
+from backend.database.db import async_db_session, create_tables, drop_tables
+from backend.database.redis import redis_client
+from backend.plugin.tools import get_plugin_sql, get_plugins
 from backend.utils.console import console
 from backend.utils.file_ops import install_git_plugin, install_zip_plugin, parse_sql_script
+from backend.utils.import_parse import import_module_cached
 
 output_help = '\n更多信息，尝试 "[cyan]--help[/]"'
 
@@ -38,6 +39,63 @@ class CustomReloadFilter(PythonFilter):
         super().__init__(extra_extensions=['.json', '.yaml', '.yml'])
 
 
+async def init() -> None:
+    panel_content = Text()
+    panel_content.append('【数据库配置】', style='bold green')
+    panel_content.append('\n\n  • 类型: ')
+    panel_content.append(f'{settings.DATABASE_TYPE}', style='yellow')
+    panel_content.append('\n  • 数据库：')
+    panel_content.append(f'{settings.DATABASE_SCHEMA}', style='yellow')
+    panel_content.append('\n  • 主键模式：')
+    panel_content.append(
+        f'{settings.DATABASE_PK_MODE}',
+        style='yellow',
+    )
+    pk_details = panel_content.from_markup(
+        '[link=https://fastapi-practices.github.io/fastapi_best_architecture_docs/backend/reference/pk.html]（了解详情）[/]'
+    )
+    panel_content.append(pk_details)
+    panel_content.append('\n\n【Redis 配置】', style='bold green')
+    panel_content.append('\n\n  • 数据库：')
+    panel_content.append(f'{settings.REDIS_DATABASE}', style='yellow')
+    plugins = get_plugins()
+    panel_content.append('\n\n【已安装插件】', style='bold green')
+    panel_content.append('\n\n  • ')
+    if plugins:
+        panel_content.append(f'{", ".join(plugins)}', style='yellow')
+    else:
+        panel_content.append('无', style='dim')
+
+    console.print(Panel(panel_content, title=f'fba v{__version__} 初始化', border_style='cyan', padding=(1, 2)))
+    ok = Prompt.ask(
+        '即将[red]重建数据库表[/red]并[red]执行所有 SQL 脚本[/red]，确认继续吗？', choices=['y', 'n'], default='n'
+    )
+
+    if ok.lower() == 'y':
+        console.print('开始初始化...', style='white')
+        try:
+            console.print('丢弃数据库表', style='white')
+            await drop_tables()
+            console.print('丢弃 Redis 缓存', style='white')
+            await redis_client.delete_prefix(settings.JWT_USER_REDIS_PREFIX)
+            await redis_client.delete_prefix(settings.TOKEN_EXTRA_INFO_REDIS_PREFIX)
+            await redis_client.delete_prefix(settings.TOKEN_REDIS_PREFIX)
+            await redis_client.delete_prefix(settings.TOKEN_REFRESH_REDIS_PREFIX)
+            console.print('创建数据库表', style='white')
+            await create_tables()
+            console.print('执行 SQL 脚本', style='white')
+            sql_scripts = await get_sql_scripts()
+            for sql_script in sql_scripts:
+                console.print(f'正在执行：{sql_script}', style='white')
+                await execute_sql_scripts(sql_script, is_init=True)
+            console.print('初始化成功', style='green')
+            console.print('\n快试试 [bold cyan]fba run[/bold cyan] 启动服务吧~')
+        except Exception as e:
+            raise cappa.Exit(f'初始化失败：{e}', code=1)
+    else:
+        console.print('已取消初始化', style='yellow')
+
+
 def run(host: str, port: int, reload: bool, workers: int) -> None:  # noqa: FBT001
     url = f'http://{host}:{port}'
     docs_url = url + settings.FASTAPI_DOCS_URL
@@ -45,16 +103,33 @@ def run(host: str, port: int, reload: bool, workers: int) -> None:  # noqa: FBT0
     openapi_url = url + (settings.FASTAPI_OPENAPI_URL or '')
 
     panel_content = Text()
-    panel_content.append(f'当前版本: v{__version__}')
-    panel_content.append(f'\n服务地址: {url}')
-    panel_content.append('\n官方文档: https://fastapi-practices.github.io/fastapi_best_architecture_docs/')
+    panel_content.append('Python 版本：', style='bold cyan')
+    panel_content.append(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}', style='white')
+
+    panel_content.append('\nAPI 请求地址: ', style='bold cyan')
+    panel_content.append(f'{url}{settings.FASTAPI_API_V1_PATH}', style='blue')
+
+    panel_content.append('\n\n环境模式：', style='bold green')
+    env_style = 'yellow' if settings.ENVIRONMENT == 'dev' else 'green'
+    panel_content.append(f'{settings.ENVIRONMENT.upper()}', style=env_style)
+
+    plugins = get_plugins()
+    panel_content.append('\n已安装插件：', style='bold green')
+    if plugins:
+        panel_content.append(f'{", ".join(plugins)}', style='yellow')
+    else:
+        panel_content.append('无', style='white')
 
     if settings.ENVIRONMENT == 'dev':
-        panel_content.append(f'\n\n📖 Swagger 文档: {docs_url}', style='yellow')
-        panel_content.append(f'\n📚 Redoc   文档: {redoc_url}', style='blue')
-        panel_content.append(f'\n📡 OpenAPI JSON: {openapi_url}', style='green')
+        panel_content.append(f'\n\n📖 Swagger 文档: {docs_url}', style='bold magenta')
+        panel_content.append(f'\n📚 Redoc   文档: {redoc_url}', style='bold magenta')
+        panel_content.append(f'\n📡 OpenAPI JSON: {openapi_url}', style='bold magenta')
 
-    console.print(Panel(panel_content, title='mes 服务信息', border_style='purple', padding=(1, 2)))
+
+    panel_content.append('\n🌐 架构官方文档: ', style='bold magenta')
+    panel_content.append('https://fastapi-practices.github.io/fastapi_best_architecture_docs/')
+
+    console.print(Panel(panel_content, title=f'fba v{__version__}', border_style='purple', padding=(1, 2)))
     granian.Granian(
         target='backend.main:app',
         interface='asgi',
@@ -107,7 +182,7 @@ async def install_plugin(
         raise cappa.Exit('path 和 repo_url 不能同时指定', code=1)
 
     plugin_name = None
-    console.print(Text('开始安装插件...', style='bold cyan'))
+    console.print('开始安装插件...', style='bold cyan')
 
     try:
         if path:
@@ -115,18 +190,44 @@ async def install_plugin(
         if repo_url:
             plugin_name = await install_git_plugin(repo_url=repo_url)
 
-        console.print(Text(f'插件 {plugin_name} 安装成功', style='bold green'))
+        console.print(f'插件 {plugin_name} 安装成功', style='bold green')
 
         sql_file = await get_plugin_sql(plugin_name, db_type, pk_type)
         if sql_file and not no_sql:
-            console.print(Text('开始自动执行插件 SQL 脚本...', style='bold cyan'))
+            console.print('开始自动执行插件 SQL 脚本...', style='bold cyan')
             await execute_sql_scripts(sql_file)
 
     except Exception as e:
         raise cappa.Exit(e.msg if isinstance(e, BaseExceptionError) else str(e), code=1)
 
 
-async def execute_sql_scripts(sql_scripts: str) -> None:
+async def get_sql_scripts() -> list[str]:
+    sql_scripts = []
+    db_dir = (
+        BASE_PATH / 'sql' / 'mysql'
+        if DataBaseType.mysql == settings.DATABASE_TYPE
+        else BASE_PATH / 'sql' / 'postgresql'
+    )
+    main_sql_file = (
+        db_dir / 'init_test_data.sql'
+        if PrimaryKeyType.autoincrement == settings.DATABASE_PK_MODE
+        else db_dir / 'init_snowflake_test_data.sql'
+    )
+
+    main_sql_path = anyio.Path(main_sql_file)
+    if await main_sql_path.exists():
+        sql_scripts.append(str(main_sql_file))
+
+    plugins = get_plugins()
+    for plugin in plugins:
+        plugin_sql = await get_plugin_sql(plugin, settings.DATABASE_TYPE, settings.DATABASE_PK_MODE)
+        if plugin_sql:
+            sql_scripts.append(str(plugin_sql))
+
+    return sql_scripts
+
+
+async def execute_sql_scripts(sql_scripts: str, *, is_init: bool = False) -> None:
     async with async_db_session.begin() as db:
         try:
             stmts = await parse_sql_script(sql_scripts)
@@ -135,7 +236,8 @@ async def execute_sql_scripts(sql_scripts: str) -> None:
         except Exception as e:
             raise cappa.Exit(f'SQL 脚本执行失败：{e}', code=1)
 
-    console.print(Text('SQL 脚本已执行完成', style='bold green'))
+    if not is_init:
+        console.print('SQL 脚本已执行完成', style='bold green')
 
 
 async def import_table(
@@ -143,18 +245,27 @@ async def import_table(
         table_schema: str,
         table_name: str,
 ) -> None:
+    from backend.plugin.code_generator.schema.code import ImportParam
+    from backend.plugin.code_generator.service.code_service import gen_service
+
     try:
         obj = ImportParam(app=app, table_schema=table_schema, table_name=table_name)
         async with async_db_session.begin() as db:
             await gen_service.import_business_and_model(db=db, obj=obj)
+        console.log('代码生成业务和模型列导入成功', style='bold green')
+        console.log('\n快试试 [bold cyan]fba codegen[/bold cyan] 生成代码吧~')
     except Exception as e:
         raise cappa.Exit(e.msg if isinstance(e, BaseExceptionError) else str(e), code=1)
 
 
-def generate() -> None:
+async def generate() -> None:
+    from backend.plugin.code_generator.service.business_service import gen_business_service
+    from backend.plugin.code_generator.service.code_service import gen_service
+
     try:
         ids = []
-        results = run_await(gen_business_service.get_all)()
+        async with async_db_session() as db:
+            results = await gen_business_service.get_all(db=db)
 
         if not results:
             raise cappa.Exit('[red]暂无可用的代码生成业务！请先通过 import 命令导入！[/]')
@@ -177,12 +288,20 @@ def generate() -> None:
         console.print(table)
         business = IntPrompt.ask('请从中选择一个业务编号', choices=[str(_id) for _id in ids])
 
-        gen_path = run_await(gen_service.generate)(pk=business)
+        async with async_db_session.begin() as db:
+            gen_path = await gen_service.generate(db=db, pk=business)
     except Exception as e:
         raise cappa.Exit(e.msg if isinstance(e, BaseExceptionError) else str(e), code=1)
 
-    console.print(Text('\n代码已生成完毕', style='bold green'))
-    console.print(Text('\n详情请查看：'), Text(gen_path, style='bold magenta'))
+    console.print('\n代码已生成完成', style='bold green')
+    console.print(Text('\n详情请查看：'), Text(str(gen_path), style='bold magenta'))
+
+
+@cappa.command(help='初始化 fba 项目', default_long=True)
+@dataclass
+class Init:
+    async def __call__(self) -> None:
+        await init()
 
 
 @cappa.command(help='运行 API 服务', default_long=True)
@@ -276,7 +395,7 @@ class Add:
     ]
     db_type: Annotated[
         DataBaseType,
-        cappa.Arg(default='mysql', help='执行插件 SQL 脚本的数据库类型'),
+        cappa.Arg(default='postgresql', help='执行插件 SQL 脚本的数据库类型'),
     ]
     pk_type: Annotated[
         PrimaryKeyType,
@@ -304,17 +423,29 @@ class Import:
         cappa.Arg(short='tn', help='数据库表名'),
     ]
 
+    def __post_init__(self) -> None:
+        try:
+            import_module_cached('backend.plugin.code_generator')
+        except ImportError:
+            raise cappa.Exit('代码生成插件不存在，请先安装此插件')
+
     async def __call__(self) -> None:
         await import_table(self.app, self.table_schema, self.table_name)
 
 
 @cappa.command(name='codegen', help='代码生成（体验完整功能，请自行部署 fba vben 前端工程）', default_long=True)
 @dataclass
-class CodeGenerate:
+class CodeGenerator:
     subcmd: cappa.Subcommands[Import | None] = None
 
-    def __call__(self) -> None:
-        generate()
+    def __post_init__(self) -> None:
+        try:
+            import_module_cached('backend.plugin.code_generator')
+        except ImportError:
+            raise cappa.Exit('代码生成插件不存在，请先安装此插件')
+
+    async def __call__(self) -> None:
+        await generate()
 
 
 @cappa.command(help='一个高效的 fba 命令行界面', default_long=True)
@@ -324,7 +455,7 @@ class FbaCli:
         str,
         cappa.Arg(value_name='PATH', default='', show_default=False, help='在事务中执行 SQL 脚本'),
     ]
-    subcmd: cappa.Subcommands[Run | Celery | Add | CodeGenerate | None] = None
+    subcmd: cappa.Subcommands[Init | Run | Celery | Add | CodeGenerator | None] = None
 
     async def __call__(self) -> None:
         if self.sql:

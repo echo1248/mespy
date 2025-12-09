@@ -1,7 +1,17 @@
-from backend.common.i18n import i18n
+import sqlalchemy as sa
 
-__version__ = '1.10.2'
+from backend.utils.import_parse import get_all_models
+
+# import all models for auto create db tables
+for cls in get_all_models():
+    if isinstance(cls, sa.Table):
+        table_name = cls.name
+        if table_name not in globals():
+            globals()[table_name] = cls
+    else:
+        class_name = cls.__name__
+        if class_name not in globals():
+            globals()[class_name] = cls
 
 
-# 初始化 i18n
-i18n.load_locales()
+__version__ = '1.11.2'

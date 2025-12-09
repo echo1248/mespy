@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import Request
+from sqlalchemy import ColumnElement
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.admin.crud.crud_dept import dept_dao
@@ -34,7 +34,7 @@ class DeptService:
     async def get_tree(
         *,
         db: AsyncSession,
-        request: Request,
+        data_filter: ColumnElement[bool],
         name: str | None,
         leader: str | None,
         phone: str | None,
@@ -44,15 +44,14 @@ class DeptService:
         获取部门树形结构
 
         :param db: 数据库会话
-        :param request: FastAPI 请求对象
+        :param data_filter: 请求用户
         :param name: 部门名称
         :param leader: 部门负责人
         :param phone: 联系电话
         :param status: 状态
         :return:
         """
-
-        dept_select = await dept_dao.get_all(request, db, name, leader, phone, status)
+        dept_select = await dept_dao.get_all(db, data_filter, name, leader, phone, status)
         tree_data = get_tree_data(dept_select)
         return tree_data
 
@@ -68,7 +67,7 @@ class DeptService:
         dept = await dept_dao.get_by_name(db, obj.name)
         if dept:
             raise errors.ConflictError(msg='部门名称已存在')
-        if obj.parent_id:
+        if obj.parent_id is not None:
             parent_dept = await dept_dao.get(db, obj.parent_id)
             if not parent_dept:
                 raise errors.NotFoundError(msg='父级部门不存在')
@@ -107,7 +106,9 @@ class DeptService:
         :param pk: 部门 ID
         :return:
         """
-        dept = await dept_dao.get_with_relation(db, pk)
+        dept = await dept_dao.get_join(db, pk)
+        if not dept:
+            raise errors.NotFoundError(msg='部门不存在')
         if dept.users:
             raise errors.ConflictError(msg='部门下存在用户，无法删除')
         children = await dept_dao.get_children(db, pk)
