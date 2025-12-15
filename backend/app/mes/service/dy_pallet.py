@@ -77,7 +77,7 @@ class DyPalletService:
 
         # OH3R
         "66522": xm_oh3r_test_dao, "66523": xm_oh3r_test_dao, "70163": xm_oh3r_test_dao,
-        "66524": xm_oh3r_test_dao, "66525": xm_oh3r_test_dao,
+        "66524": xm_oh3r_test_dao, "66525": xm_oh3r_test_dao, "76328": xm_oh3r_test_dao,
 
         # OH11
         "66286": xm_oh11_test_dao, "73648": xm_oh11_test_dao,
