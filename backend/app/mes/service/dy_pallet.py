@@ -297,8 +297,8 @@ class DyPalletService:
         # 验证产品ID支持性
         for item in bill_params:
             if item.pallet_pid not in self.PID_MAP:
-                log.error(f"不支持的产品ID: {item.pallet_pid} {type(item.pallet_pid)}")
-                raise errors.RequestError(msg=f'不支持的产品ID:  {item.pallet_pid} {type(item.pallet_pid)}')
+                log.error(f"不支持的产品ID: {item.pallet_pid}")
+                raise errors.RequestError(msg=f'不支持的产品ID:  {item.pallet_pid}')
 
         # 检查重复参数
         self._check_duplicates(bill_params)
