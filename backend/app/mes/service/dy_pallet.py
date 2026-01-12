@@ -235,6 +235,13 @@ class DyPalletService:
                     "test_pass_1": 1,
                 }
 
+            # OH3R
+            if pallet.pallet_pid in ("66522", "66523", "70163", "66524", "66525", "76328"):
+                params.update(
+                    test_pass_2=2,
+                    test_pass_3=2,
+                )
+
             create_objs.append(params)
 
         if not create_objs:
