@@ -15,6 +15,7 @@ from backend.app.mes.crud.prod.crud_xm_m11a_test import xm_m11a_test_dao
 from backend.app.mes.crud.prod.crud_xm_oh11_test import xm_oh11_test_dao
 from backend.app.mes.crud.prod.crud_xm_oh2_test import xm_oh2_test_dao
 from backend.app.mes.crud.prod.crud_xm_oh3r_test import xm_oh3r_test_dao
+from backend.app.mes.crud.prod.crud_xm_ph3rm_test import xm_ph3rm_test_dao
 from backend.app.mes.crud.prod.crud_xm_x4b_test import xm_x4b_test_dao
 from backend.app.mes.crud.prod.crud_xm_x6a_test import xm_x6a_test_dao
 from backend.app.mes.crud.prod.crud_xm_x8c_test import xm_x8c_test_dao
@@ -31,6 +32,7 @@ from backend.app.mes.schema.prod.xm_m11a_test import CreateXMM11ATestParam
 from backend.app.mes.schema.prod.xm_oh11_test import CreateXMOH11TestParam
 from backend.app.mes.schema.prod.xm_oh2_test import CreateXMOH2TestParam
 from backend.app.mes.schema.prod.xm_oh3r_test import CreateXMOH3RTestParam
+from backend.app.mes.schema.prod.xm_ph3rm_test import CreateXMPH3RMTestParam
 from backend.app.mes.schema.prod.xm_x4b_test import CreateXMX4BTestParam
 from backend.app.mes.schema.prod.xm_x6a_test import CreateXMX6ATestParam
 from backend.app.mes.schema.prod.xm_x8c_test import CreateXMX8CTestParam
@@ -105,6 +107,9 @@ class DyPalletService:
 
         # XHB
         "47303": xm_xhb_test_dao, "44573": xm_xhb_test_dao, "44574": xm_xhb_test_dao, "28505": xm_xhb_test_dao,
+
+        # PH3RM
+        "82558": xm_ph3rm_test_dao, "82559": xm_ph3rm_test_dao,
     }
 
     # 参数类型映射
@@ -123,6 +128,7 @@ class DyPalletService:
         yz_mc601_test_dao: CreateYZMC601TestParam,
         dy_qbh4248cn_test_dao: CreateDyQBH4248CNTestParam,
         xm_xhb_test_dao: CreateXMXHBTestParam,
+        xm_ph3rm_test_dao: CreateXMPH3RMTestParam,
     }
 
     @staticmethod
@@ -237,6 +243,13 @@ class DyPalletService:
 
             # OH3R
             if pallet.pallet_pid in ("66522", "66523", "70163", "66524", "66525", "76328"):
+                params.update(
+                    test_pass_2=2,
+                    test_pass_3=2,
+                )
+
+            # PH3RM
+            if pallet.pallet_pid in ("82558", "82559"):
                 params.update(
                     test_pass_2=2,
                     test_pass_3=2,
