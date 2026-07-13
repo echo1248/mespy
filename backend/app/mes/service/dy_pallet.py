@@ -68,14 +68,14 @@ class DyPalletService:
         "933002": jr_jm03_test_dao, "933008": jr_jm03_test_dao,
 
         # L05B/C
-        "31833": xm_l05b_test_dao, "31834": xm_l05b_test_dao,
+        "31833": xm_l05b_test_dao, "31834": xm_l05b_test_dao, "89473": xm_l05b_test_dao, "89474": xm_l05b_test_dao,
 
         # M11A
         "57470": xm_m11a_test_dao, "58472": xm_m11a_test_dao, "58473": xm_m11a_test_dao,
 
         # OH2
         "61346": xm_oh2_test_dao, "73528": xm_oh2_test_dao, "73529": xm_oh2_test_dao,
-        "73530": xm_oh2_test_dao, "73531": xm_oh2_test_dao, "73532": xm_oh2_test_dao,
+        "73530": xm_oh2_test_dao, "73531": xm_oh2_test_dao, "73532": xm_oh2_test_dao, "89496": xm_oh2_test_dao,
 
         # OH3R
         "66522": xm_oh3r_test_dao, "66523": xm_oh3r_test_dao, "70163": xm_oh3r_test_dao,
