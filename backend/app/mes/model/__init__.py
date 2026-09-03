@@ -15,6 +15,7 @@ from backend.app.mes.model.prod.xm_m11a_test import XMM11ATest
 from backend.app.mes.model.prod.xm_oh2_test import XMOH2Test
 from backend.app.mes.model.prod.xm_oh3r_test import XMOH3RTest
 from backend.app.mes.model.prod.xm_ph3rm_test import XMPH3RMTest
+from backend.app.mes.model.prod.xm_qh2p_test import XMQH2PTest
 from backend.app.mes.model.prod.xm_oh11_test import XMOH11Test
 from backend.app.mes.model.prod.xm_x4b_test import XMX4BTest
 from backend.app.mes.model.prod.xm_x6a_test import XMX6ATest

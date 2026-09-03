@@ -12,6 +12,7 @@ from backend.app.mes.api.v1.prod.jr_jm03_test import router as jr_jm03
 from backend.app.mes.api.v1.prod.xm_l05b_test import router as xm_l05b
 from backend.app.mes.api.v1.prod.xm_m11a_test import router as xm_m11a
 from backend.app.mes.api.v1.prod.xm_oh2_test import router as xm_oh2
+from backend.app.mes.api.v1.prod.xm_qh2p_test import router as xm_qh2p
 from backend.app.mes.api.v1.prod.xm_oh3r_test import router as xm_oh3r
 from backend.app.mes.api.v1.prod.xm_ph3rm_test import router as xm_ph3rm
 from backend.app.mes.api.v1.prod.xm_oh11_test import router as xm_oh11
@@ -30,6 +31,7 @@ router.include_router(jr_jm03, prefix='/jr_jm03', tags=['jr_jm03'])
 router.include_router(xm_l05b, prefix='/xm_l05b', tags=['xm_l05b'])
 router.include_router(xm_m11a, prefix='/xm_m11a', tags=['xm_m11a'])
 router.include_router(xm_oh2, prefix='/xm_oh2', tags=['xm_oh2'])
+router.include_router(xm_qh2p, prefix='/xm_qh2p', tags=['xm_qh2p'])
 router.include_router(xm_oh3r, prefix='/xm_oh3r', tags=['xm_oh3r'])
 router.include_router(xm_ph3rm, prefix='/xm_ph3rm', tags=['xm_ph3rm'])
 router.include_router(xm_oh11, prefix='/xm_oh11', tags=['xm_oh11'])

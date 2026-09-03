@@ -14,6 +14,7 @@ from backend.app.mes.crud.prod.crud_xm_l0b5_test import xm_l05b_test_dao
 from backend.app.mes.crud.prod.crud_xm_m11a_test import xm_m11a_test_dao
 from backend.app.mes.crud.prod.crud_xm_oh11_test import xm_oh11_test_dao
 from backend.app.mes.crud.prod.crud_xm_oh2_test import xm_oh2_test_dao
+from backend.app.mes.crud.prod.crud_xm_qh2p_test import xm_qh2p_test_dao
 from backend.app.mes.crud.prod.crud_xm_oh3r_test import xm_oh3r_test_dao
 from backend.app.mes.crud.prod.crud_xm_ph3rm_test import xm_ph3rm_test_dao
 from backend.app.mes.crud.prod.crud_xm_x4b_test import xm_x4b_test_dao
@@ -31,6 +32,7 @@ from backend.app.mes.schema.prod.xm_l05b_test import CreateXML05BTestParam
 from backend.app.mes.schema.prod.xm_m11a_test import CreateXMM11ATestParam
 from backend.app.mes.schema.prod.xm_oh11_test import CreateXMOH11TestParam
 from backend.app.mes.schema.prod.xm_oh2_test import CreateXMOH2TestParam
+from backend.app.mes.schema.prod.xm_qh2p_test import CreateXMQH2PTestParam
 from backend.app.mes.schema.prod.xm_oh3r_test import CreateXMOH3RTestParam
 from backend.app.mes.schema.prod.xm_ph3rm_test import CreateXMPH3RMTestParam
 from backend.app.mes.schema.prod.xm_x4b_test import CreateXMX4BTestParam
@@ -110,6 +112,9 @@ class DyPalletService:
 
         # PH3RM
         "82558": xm_ph3rm_test_dao, "82559": xm_ph3rm_test_dao,
+
+        # QH2P
+        "89753": xm_qh2p_test_dao, "89754": xm_qh2p_test_dao, "94838": xm_qh2p_test_dao,
     }
 
     # 参数类型映射
@@ -129,6 +134,7 @@ class DyPalletService:
         dy_qbh4248cn_test_dao: CreateDyQBH4248CNTestParam,
         xm_xhb_test_dao: CreateXMXHBTestParam,
         xm_ph3rm_test_dao: CreateXMPH3RMTestParam,
+        xm_qh2p_test_dao: CreateXMQH2PTestParam,
     }
 
     @staticmethod
