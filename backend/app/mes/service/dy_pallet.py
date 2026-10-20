@@ -115,6 +115,7 @@ class DyPalletService:
 
         # QH2P
         "89753": xm_qh2p_test_dao, "89754": xm_qh2p_test_dao, "94838": xm_qh2p_test_dao,
+        "94836": xm_qh2p_test_dao, "94837": xm_qh2p_test_dao, "95863": xm_qh2p_test_dao,
     }
 
     # 参数类型映射
