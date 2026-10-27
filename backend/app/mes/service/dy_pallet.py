@@ -273,7 +273,9 @@ class DyPalletService:
             param_class = self.CREATE_PARAM_MAP[prod_dao]
             instances = [param_class(**obj) for obj in create_objs if obj["test_skukey"] == param.pallet_key]
             if not instances:
-                raise errors.RequestError(msg=f"未找到对应的栈板和箱信息: {param}")
+                raise errors.RequestError(
+                    msg=f"栈板未生成可入库记录: pallet_pid={param.pallet_pid}, pallet_key={param.pallet_key}"
+                )
 
             data_dicts = [instance.__dict__ for instance in instances]
             await db.execute(prod_dao.model.__table__.insert(), data_dicts)  # noqa 优化批量插入
