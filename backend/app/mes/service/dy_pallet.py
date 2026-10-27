@@ -4,7 +4,7 @@ import json
 from typing import List, Sequence
 from dataclasses import dataclass
 
-from sqlalchemy import Select, insert
+from sqlalchemy import Select, select
 
 from backend.app.mes.crud.crud_dy_carton import dy_carton_dao
 from backend.app.mes.crud.crud_dy_pallet import dy_pallet_dao
@@ -195,19 +195,20 @@ class DyPalletService:
 
     async def _process_bill(self, bill_params: List[BillParam], bill_type: str, is_reverse: bool) -> None:
         """处理单据的核心方法"""
-        pallets, cartons = await self._validate_bill_params(bill_params)
+        async with async_db_session.begin() as db:
+            pallets, cartons = await self._validate_bill_params(db, bill_params)
 
-        if is_reverse:
-            await self._reverse_bill_operation(cartons, bill_params, bill_type)
-        else:
-            await self._approve_bill_operation(pallets, cartons, bill_params, bill_type)
+            if is_reverse:
+                await self._reverse_bill_operation(db, cartons, bill_params, bill_type)
+            else:
+                await self._approve_bill_operation(db, pallets, cartons, bill_params, bill_type)
 
-    async def _approve_bill_operation(self, pallets: List[DyPallet], cartons: Sequence[DyCarton],
+    async def _approve_bill_operation(self, db, pallets: List[DyPallet], cartons: Sequence[DyCarton],
                                       bill_params: List[BillParam], bill_type: str) -> None:
         """执行审核单据操作"""
         config = self.BILL_CONFIGS[bill_type]
         pallet_map = {pallet.pallet_cartonkey: pallet for pallet in pallets}
-        bill_map = {bill.pallet_pid: bill for bill in bill_params}
+        bill_map = {(bill.pallet_pid, bill.pallet_key): bill for bill in bill_params}
 
         create_objs = []
         for carton in cartons:
@@ -215,7 +216,7 @@ class DyPalletService:
             if pallet is None:
                 continue
 
-            bill = bill_map.get(pallet.pallet_pid)
+            bill = bill_map.get((pallet.pallet_pid, pallet.pallet_key))
             if bill is None:
                 continue
 
@@ -272,27 +273,24 @@ class DyPalletService:
             param_class = self.CREATE_PARAM_MAP[prod_dao]
             instances = [param_class(**obj) for obj in create_objs if obj["test_skukey"] == param.pallet_key]
             if not instances:
-                log.warning(f"未找到对应的栈板和箱信息: {param}")
-                continue
+                raise errors.RequestError(msg=f"未找到对应的栈板和箱信息: {param}")
 
-            async with async_db_session.begin() as db:
-                data_dicts = [instance.__dict__ for instance in instances]
-                await db.execute(prod_dao.model.__table__.insert(), data_dicts)  # noqa 优化批量插入
+            data_dicts = [instance.__dict__ for instance in instances]
+            await db.execute(prod_dao.model.__table__.insert(), data_dicts)  # noqa 优化批量插入
 
-    async def _reverse_bill_operation(self, cartons: Sequence[DyCarton], bill_params: List[BillParam],
+    async def _reverse_bill_operation(self, db, cartons: Sequence[DyCarton], bill_params: List[BillParam],
                                       bill_type: str) -> None:
         """执行冲销单据操作"""
         config = self.BILL_CONFIGS[bill_type]
         sn_keys = [carton.carton_boxsn for carton in cartons]
 
-        async with async_db_session.begin() as db:
-            for pallet_pid in {param.pallet_pid for param in bill_params}:
-                prod_dao = self.PID_MAP[pallet_pid]
+        for pallet_pid in {param.pallet_pid for param in bill_params}:
+            prod_dao = self.PID_MAP[pallet_pid]
 
-                if pallet_pid == "44481":  # 音箱特殊处理
-                    await self._handle_speaker_reverse(prod_dao, db, config, sn_keys)
-                else:
-                    await self._handle_products_reverse(prod_dao, db, config, sn_keys)
+            if pallet_pid == "44481":
+                await self._handle_speaker_reverse(prod_dao, db, config, sn_keys)
+            else:
+                await self._handle_products_reverse(prod_dao, db, config, sn_keys)
 
     async def _handle_speaker_reverse(self, prod_dao, db, config, sn_keys):
         """处理音箱冲销逻辑"""
@@ -316,7 +314,7 @@ class DyPalletService:
             db, allow_multiple=True, test_snkey__in=sn_keys, test_stkey=config.test_stkey
         )
 
-    async def _validate_bill_params(self, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence]:
+    async def _validate_bill_params(self, db, bill_params: List[BillParam]) -> tuple[List[DyPallet], Sequence]:
         """验证单据参数并获取相关数据"""
         if not bill_params:
             raise errors.RequestError(msg="单据参数不能为空")
@@ -330,35 +328,49 @@ class DyPalletService:
         # 检查重复参数
         self._check_duplicates(bill_params)
 
-        async with async_db_session() as db:
-            pallet_keys = [item.pallet_key for item in bill_params]
-            all_pallets = await dy_pallet_dao.select_models(db, pallet_key__in=pallet_keys)
+        pallet_keys = [item.pallet_key for item in bill_params]
+        pallet_stmt = (
+            select(DyPallet)
+            .where(DyPallet.pallet_key.in_(pallet_keys))
+            .with_for_update()
+        )
+        all_pallets = list((await db.scalars(pallet_stmt)).all())
 
-            error_list = []
-            valid_pallets = []
-            for param in bill_params:
-                matching_pallets = [
-                    p for p in all_pallets
-                    if p.pallet_key == param.pallet_key and p.pallet_pid == param.pallet_pid
-                ]
-                if not matching_pallets:
-                    error_list.append({"msg": "PID不存在或栈板号不存在", **param.model_dump()})
-                    continue
+        error_list = []
+        valid_pallets = []
+        for param in bill_params:
+            matching_pallets = [
+                p for p in all_pallets
+                if p.pallet_key == param.pallet_key and p.pallet_pid == param.pallet_pid
+            ]
+            if not matching_pallets:
+                error_list.append({"msg": "PID不存在或栈板号不存在", **param.model_dump()})
+                continue
 
-                valid_pallets.extend(matching_pallets)
-                error_list.append({"msg": None, **param.model_dump()})
+            valid_pallets.extend(matching_pallets)
+            error_list.append({"msg": None, **param.model_dump()})
 
-            # 如果有错误立即返回，避免不必要的数据库查询
-            if error_list and any(item["msg"] for item in error_list):
-                raise errors.RequestError(msg=json.dumps(error_list))
+        if error_list and any(item["msg"] for item in error_list):
+            raise errors.RequestError(msg=json.dumps(error_list))
 
-            # 批量查询箱信息
-            carton_keys = [pallet.pallet_cartonkey for pallet in valid_pallets]
-            cartons = await dy_carton_dao.select_models(
-                db, carton_key__in=carton_keys
-            ) if carton_keys else []
+        carton_keys = [pallet.pallet_cartonkey for pallet in valid_pallets]
+        carton_stmt = (
+            select(DyCarton)
+            .where(DyCarton.carton_key.in_(carton_keys))
+            .with_for_update()
+        ) if carton_keys else None
+        cartons = list((await db.scalars(carton_stmt)).all()) if carton_stmt is not None else []
 
-            return valid_pallets, cartons
+        carton_key_set = {carton.carton_key for carton in cartons}
+        missing_cartons = [
+            pallet.pallet_key
+            for pallet in valid_pallets
+            if pallet.pallet_cartonkey not in carton_key_set
+        ]
+        if missing_cartons:
+            raise errors.RequestError(msg=f"栈板缺少纸箱信息: {missing_cartons}")
+
+        return valid_pallets, cartons
 
     def _check_duplicates(self, bill_params: List[BillParam]) -> None:
         """快速检查是否存在重复参数"""

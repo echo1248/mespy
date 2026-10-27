@@ -50,6 +50,7 @@ def create_async_engine_and_session(url: str | URL) -> tuple[AsyncEngine, async_
         # 数据库引擎
         engine = create_async_engine(
             url,
+            isolation_level='READ COMMITTED',
             echo=settings.DATABASE_ECHO,
             echo_pool=settings.DATABASE_POOL_ECHO,
             future=True,
