@@ -209,7 +209,7 @@ class DyPalletService:
         """执行审核单据操作"""
         config = self.BILL_CONFIGS[bill_type]
         pallet_map = {pallet.pallet_cartonkey: pallet for pallet in pallets}
-        bill_map = {(bill.pallet_pid, bill.pallet_pid): bill for bill in bill_params}
+        bill_map = {(bill.pallet_pid, bill.pallet_key): bill for bill in bill_params}
 
         create_objs = []
         for carton in cartons:
@@ -217,7 +217,7 @@ class DyPalletService:
             if pallet is None:
                 continue
 
-            bill = bill_map.get((pallet.pallet_pid, pallet.pallet_pid))
+            bill = bill_map.get((pallet.pallet_pid, pallet.pallet_key))
             if bill is None:
                 continue
 
