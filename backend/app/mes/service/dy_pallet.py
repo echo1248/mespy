@@ -116,6 +116,7 @@ class DyPalletService:
         # QH2P
         "89753": xm_qh2p_test_dao, "89754": xm_qh2p_test_dao, "94838": xm_qh2p_test_dao,
         "94836": xm_qh2p_test_dao, "94837": xm_qh2p_test_dao, "95863": xm_qh2p_test_dao,
+        "96911": xm_qh2p_test_dao,
     }
 
     # 参数类型映射
@@ -208,7 +209,7 @@ class DyPalletService:
         """执行审核单据操作"""
         config = self.BILL_CONFIGS[bill_type]
         pallet_map = {pallet.pallet_cartonkey: pallet for pallet in pallets}
-        bill_map = {(bill.pallet_pid, bill.pallet_key): bill for bill in bill_params}
+        bill_map = {(bill.pallet_pid, bill.pallet_pid): bill for bill in bill_params}
 
         create_objs = []
         for carton in cartons:
@@ -216,7 +217,7 @@ class DyPalletService:
             if pallet is None:
                 continue
 
-            bill = bill_map.get((pallet.pallet_pid, pallet.pallet_key))
+            bill = bill_map.get((pallet.pallet_pid, pallet.pallet_pid))
             if bill is None:
                 continue
 
